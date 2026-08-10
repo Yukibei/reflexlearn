@@ -3,10 +3,11 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://reflexlearn:reflexlearn@127.0.0.1:15432/reflexlearn"
-    redis_url: str = "redis://127.0.0.1:16379/0"
-    qdrant_url: str = "http://127.0.0.1:16333"
-    neo4j_uri: str = "bolt://127.0.0.1:17687"
+    database_url: str = "postgresql://reflexlearn:reflexlearn@127.0.0.1:25432/reflexlearn"
+    redis_url: str = "redis://127.0.0.1:26379/0"
+    qdrant_url: str = "http://127.0.0.1:26333"
+    qdrant_trust_env: bool = False
+    neo4j_uri: str = "bolt://127.0.0.1:27687"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "reflexlearn"
 
@@ -21,7 +22,7 @@ class Settings(BaseSettings):
     llm_request_timeout_s: float = 30.0  # 单次 LLM 外呼总超时（read/write）；中转站无响应时快速降级
     llm_connect_timeout_s: float = 5.0   # 连接超时单独设短：中转站 SYN 黑洞时 5s 快速降级，不等满总超时（PERF-C）
 
-    kafka_bootstrap_servers: str = "127.0.0.1:19092"
+    kafka_bootstrap_servers: str = "127.0.0.1:29092"
 
     enable_reflexion: bool = True
     enable_rerank: bool = True
@@ -63,7 +64,7 @@ class Settings(BaseSettings):
 
     # —— M4-D MinIO 原始存储 + Spark/批清洗 ——
     enable_minio: bool = False           # 是否用 MinIO 原始存储（缺服务降级）
-    minio_endpoint: str = "127.0.0.1:19000"
+    minio_endpoint: str = "127.0.0.1:29000"
     minio_access_key: str = "minioadmin"
     minio_secret_key: str = "minioadmin"
     minio_bucket: str = "reflexlearn-raw"
@@ -127,8 +128,8 @@ class Settings(BaseSettings):
     mdn_search_timeout_s: float = 6.0
 
     cors_allow_origins: str = (
-        "http://localhost:3000,http://localhost:3001,"
-        "http://127.0.0.1:3000,http://127.0.0.1:3001"
+        "http://localhost:3000,http://localhost:3001,http://localhost:3002,"
+        "http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:3002"
     )
     trusted_hosts: str = "127.0.0.1,localhost,testserver"
 

@@ -2,7 +2,7 @@ services:
   # ============ core profile ============
   postgres:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}library/postgres:16-alpine
-    ports: ["15432:5432"]
+    ports: ["${POSTGRES_PORT:-25432}:5432"]
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-reflexlearn}
       POSTGRES_USER: ${POSTGRES_USER:-reflexlearn}
@@ -18,7 +18,7 @@ services:
 
   redis:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}library/redis:7-alpine
-    ports: ["16379:6379"]
+    ports: ["${REDIS_PORT:-26379}:6379"]
     volumes:
       - redis_data:/data
     profiles: [core]
@@ -30,7 +30,7 @@ services:
 
   qdrant:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}qdrant/qdrant:latest
-    ports: ["16333:6333", "16334:6334"]
+    ports: ["${QDRANT_HTTP_PORT:-26333}:6333", "${QDRANT_GRPC_PORT:-26334}:6334"]
     volumes:
       - qdrant_data:/qdrant/storage
     profiles: [core]
@@ -43,7 +43,7 @@ services:
   # ============ graph profile ============
   neo4j:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}neo4j:5-community
-    ports: ["17474:7474", "17687:7687"]
+    ports: ["${NEO4J_HTTP_PORT:-27474}:7474", "${NEO4J_BOLT_PORT:-27687}:7687"]
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-reflexlearn}
     volumes:
@@ -56,13 +56,13 @@ services:
     # advertised 必须是宿主可达地址：consumer/producer 在宿主跑、连 127.0.0.1:19092，
     # 旧 bitnami 配置 advertise 容器名 kafka:9092 宿主解析不了（M4-C 此前从未活体所以没暴露）。
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}apache/kafka:latest
-    ports: ["19092:9092"]
+    ports: ["${KAFKA_PORT:-29092}:9092"]
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:19092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:${KAFKA_PORT:-29092}
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -73,7 +73,7 @@ services:
 
   minio:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}minio/minio:latest
-    ports: ["19000:9000", "19001:9001"]
+    ports: ["${MINIO_API_PORT:-29000}:9000", "${MINIO_CONSOLE_PORT:-29001}:9001"]
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
@@ -85,14 +85,14 @@ services:
   # ============ observe profile ============
   prometheus:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}prom/prometheus:latest
-    ports: ["19090:9090"]
+    ports: ["${PROMETHEUS_PORT:-29090}:9090"]
     volumes:
       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     profiles: [observe]
 
   grafana:
     image: ${DOCKER_IMAGE_PREFIX:-docker.m.daocloud.io/}grafana/grafana:latest
-    ports: ["13001:3000"]
+    ports: ["${GRAFANA_PORT:-23001}:3000"]
     depends_on: [prometheus]
     volumes:
       - ./deploy/grafana/provisioning:/etc/grafana/provisioning

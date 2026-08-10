@@ -34,7 +34,11 @@ class FakeGraphGateway:
 
 async def check_qdrant_forgetting(settings) -> bool:
     marker = f"wave2-live-{uuid4().hex}"
-    client = AsyncQdrantClient(url=settings.qdrant_url, timeout=settings.qdrant_timeout_s)
+    client = AsyncQdrantClient(
+        url=settings.qdrant_url,
+        timeout=settings.qdrant_timeout_s,
+        trust_env=settings.qdrant_trust_env,
+    )
     try:
         await client.get_collection(EXPERIENCE_COLLECTION)
         point_id = uuid4().hex

@@ -12,5 +12,5 @@ use_python_defaults
 
 {
   log_header "check_wave2_live"
-  "$(python_cmd)" "$SCRIPTS_ROOT/checks/infra/check_wave2_live.py"
+  python_file "$SCRIPTS_ROOT/checks/infra/check_wave2_live.py"
 } 2>&1 | tee -a "$LOG_DIR/check_wave2_live.log"

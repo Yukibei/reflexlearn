@@ -12,5 +12,5 @@ use_python_defaults
 
 {
   log_header "run_forget"
-  "$(python_cmd)" "$SCRIPTS_ROOT/jobs/run_forget.py" "$@"
+  python_file "$SCRIPTS_ROOT/jobs/run_forget.py" "$@"
 } 2>&1 | tee -a "$LOG_DIR/run_forget.log"

@@ -17,5 +17,5 @@ export REFLEXLEARN_LOG_FILE="${REFLEXLEARN_LOG_FILE:-$LOG_DIR/run_eval_python.lo
     echo "scripts/jobs/run_eval.py is not implemented yet."
     exit 2
   fi
-  "$(python_cmd)" "$SCRIPTS_ROOT/jobs/run_eval.py" "$@"
+  python_file "$SCRIPTS_ROOT/jobs/run_eval.py" "$@"
 } 2>&1 | tee -a "$LOG_DIR/run_eval.log"

@@ -10,5 +10,5 @@ use_python_defaults
 
 {
   log_header "prepare_lora_dataset"
-  "$(python_cmd)" scripts/jobs/training/prepare_lora_dataset.py "$@"
+  python_file "$SCRIPTS_ROOT/jobs/training/prepare_lora_dataset.py" "$@"
 } 2>&1 | tee -a "$LOG_DIR/prepare_lora_dataset.log"

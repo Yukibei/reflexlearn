@@ -19,11 +19,9 @@ log_header() {
 }
 
 use_local_network() {
-  export NO_PROXY="${NO_PROXY:-*}"
-  export no_proxy="${no_proxy:-*}"
-  export HTTP_PROXY="${HTTP_PROXY:-}"
-  export HTTPS_PROXY="${HTTPS_PROXY:-}"
-  export ALL_PROXY="${ALL_PROXY:-}"
+  local local_hosts="127.0.0.1,localhost,::1"
+  export NO_PROXY="${NO_PROXY:+$NO_PROXY,}$local_hosts"
+  export no_proxy="${no_proxy:+$no_proxy,}$local_hosts"
 }
 
 use_python_defaults() {
@@ -92,6 +90,27 @@ python_cmd() {
 
   echo ".venv python executable not found; create it with uv first" >&2
   return 127
+}
+
+native_path() {
+  local path="$1"
+
+  if [[ "$path" == /* ]] && command -v wslpath >/dev/null 2>&1; then
+    wslpath -w "$path"
+    return
+  fi
+  if [[ "$path" == /* ]] && command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$path"
+    return
+  fi
+
+  printf '%s\n' "$path"
+}
+
+python_file() {
+  local script_path="$1"
+  shift
+  "$(python_cmd)" "$(native_path "$script_path")" "$@"
 }
 
 docker_cmd() {

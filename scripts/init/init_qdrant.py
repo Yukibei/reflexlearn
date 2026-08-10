@@ -24,8 +24,12 @@ PAYLOAD_INDEXES = [
 
 
 async def main():
-    url = get_settings().qdrant_url
-    client = AsyncQdrantClient(url=url)
+    settings = get_settings()
+    client = AsyncQdrantClient(
+        url=settings.qdrant_url,
+        timeout=settings.qdrant_timeout_s,
+        trust_env=settings.qdrant_trust_env,
+    )
 
     try:
         existing = [c.name for c in (await client.get_collections()).collections]

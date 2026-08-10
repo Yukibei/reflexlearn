@@ -40,6 +40,7 @@ def get_qdrant():
         _qdrant = AsyncQdrantClient(
             url=settings.qdrant_url,
             timeout=settings.qdrant_timeout_s,
+            trust_env=settings.qdrant_trust_env,
         )
     return _qdrant
 
