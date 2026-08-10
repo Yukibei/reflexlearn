@@ -13,6 +13,7 @@ from reflexlearn.collaboration.traces import get_default_trace_store
 from reflexlearn.common.auth import CurrentUser
 from reflexlearn.learning.spaces import SessionOutcome, get_space_store
 from reflexlearn.orchestration.graph import run_session
+from reflexlearn.orchestration.intent import resolve_direct_response
 from reflexlearn.safety import SafetyGateway, safety_audit_event
 from reflexlearn.security.audit import AuditLog
 
@@ -78,6 +79,12 @@ async def event_stream(
         )
         yield sse_event("error", {"error": "input_blocked", "reasons": input_decision.reasons})
         yield sse_event("done", {"status": "blocked"})
+        return
+
+    direct_response = resolve_direct_response(message)
+    if direct_response is not None:
+        yield sse_event("assistant_message", {"content": direct_response.content})
+        yield sse_event("done", {"status": "completed"})
         return
 
     # 收集本次会话的可沉淀产出（assemble 资源全文 + path_plan 路径），done 前落空间。

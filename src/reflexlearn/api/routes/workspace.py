@@ -57,6 +57,11 @@ class CreateSpaceRequest(BaseModel):
     course: str = ""
 
 
+class UpdateSpaceRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    course: str = Field(default="", max_length=200)
+
+
 @router.post("/spaces")
 async def create_space(req: CreateSpaceRequest, user: CurrentUser = Depends(get_current_user)):
     pg_pool = await safe_pg_pool()
@@ -84,10 +89,44 @@ async def get_space_detail(space_id: str, user: CurrentUser = Depends(get_curren
     return detail
 
 
+@router.patch("/spaces/{space_id}")
+async def update_space(
+    space_id: str,
+    req: UpdateSpaceRequest,
+    user: CurrentUser = Depends(get_current_user),
+):
+    pg_pool = await safe_pg_pool()
+    detail = await get_space_store().update_space(
+        space_id,
+        user_id=user.user_id,
+        tenant_id=user.tenant_id,
+        title=req.title,
+        course=req.course,
+        pg_pool=pg_pool,
+    )
+    if detail is None:
+        return JSONResponse(status_code=404, content={"error": "space_not_found"})
+    return detail
+
+
+@router.delete("/spaces/{space_id}")
+async def delete_space(space_id: str, user: CurrentUser = Depends(get_current_user)):
+    pg_pool = await safe_pg_pool()
+    deleted = await get_space_store().delete_space(
+        space_id,
+        user_id=user.user_id,
+        tenant_id=user.tenant_id,
+        pg_pool=pg_pool,
+    )
+    if not deleted:
+        return JSONResponse(status_code=404, content={"error": "space_not_found"})
+    return {"deleted": True, "space_id": space_id}
+
+
 @router.get("/spaces")
 async def list_spaces(user: CurrentUser = Depends(get_current_user)):
     pg_pool = await safe_pg_pool()
-    return await get_asset_store().list_spaces(
+    return await get_space_store().list_spaces(
         user_id=user.user_id,
         tenant_id=user.tenant_id,
         pg_pool=pg_pool,

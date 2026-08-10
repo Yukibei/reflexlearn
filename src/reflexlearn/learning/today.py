@@ -172,15 +172,17 @@ def _next_practice_topic(goal: str, weak_points: Sequence[str]) -> str:
 
 def _resource_from_mapping(item: Mapping[str, object]) -> TodayResource:
     kind = _resource_kind(_text(item.get("type"), "ai_document"))
+    resource_id = _text(item.get("resource_id") or item.get("id") or item.get("title"), kind)
+    href = _text(item.get("href"), f"/resources/{resource_id}")
     return TodayResource(
-        id=_text(item.get("resource_id") or item.get("id") or item.get("title"), kind),
+        id=resource_id,
         type=kind,
         title=_text(item.get("title") or item.get("type"), "学习资源"),
         provider=_text(item.get("provider"), "ReflexLearn"),
         source_label=_text(item.get("source_label"), _source_label(kind)),
         estimated_minutes=_int(item.get("estimated_minutes"), 10),
         reason=_text(item.get("reason"), "与当前学习目标相关。"),
-        href=_text(item.get("href"), "/resources"),
+        href=href,
         embed_url=_text(item.get("embed_url")),
         usage_mode=_text(item.get("usage_mode"), "personal"),
         source_policy=_text(item.get("source_policy"), "owned_or_generated"),

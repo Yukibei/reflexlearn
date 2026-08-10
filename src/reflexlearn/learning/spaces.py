@@ -12,53 +12,19 @@ import itertools
 import json
 import logging
 
-from pydantic import BaseModel, Field
+from reflexlearn.learning.space_mutations import (
+    SpaceRecord,
+    delete_space_record,
+    update_space_record,
+)
+from reflexlearn.learning.space_models import (
+    SessionOutcome,
+    SpaceDetail,
+    SpacePathStep,
+    SpaceResource,
+)
 
 logger = logging.getLogger(__name__)
-
-
-class SpacePathStep(BaseModel):
-    sequence: int = 0
-    task_ref: str = ""
-    resource_type: str = ""
-    concept: str = ""
-    objective: str = ""
-    rationale: str = ""
-    difficulty: float = 0.0
-    mastery_status: str = "not_started"
-
-
-class SpaceResource(BaseModel):
-    resource_id: str
-    type: str
-    title: str = ""
-    concept: str = ""
-    content: str = ""
-    quality_score: float | None = None
-
-
-class SpaceDetail(BaseModel):
-    space_id: str
-    user_id: str
-    tenant_id: str
-    title: str
-    course: str = ""
-    status: str = "active"
-    progress: float = 0.0
-    path_summary: str = ""
-    path_strategy: str = ""
-    steps: list[SpacePathStep] = Field(default_factory=list)
-    resources: list[SpaceResource] = Field(default_factory=list)
-    degraded: list[str] = Field(default_factory=list)
-
-
-class SessionOutcome(BaseModel):
-    """一次 /chat 会话的可沉淀产出。"""
-
-    resources: list[dict] = Field(default_factory=list)
-    path_steps: list[dict] = Field(default_factory=list)
-    path_summary: str = ""
-    path_strategy: str = ""
 
 
 class SpaceStore:
@@ -66,9 +32,34 @@ class SpaceStore:
 
     def __init__(self) -> None:
         self._mem_seq = itertools.count(1)
-        self._spaces: dict[str, dict] = {}
+        self._spaces: dict[str, SpaceRecord] = {}
         self._resources: dict[str, list[dict]] = {}
         self._paths: dict[str, dict] = {}
+
+    async def list_spaces(self, *, user_id: str, tenant_id: str, pg_pool=None) -> dict:
+        if pg_pool is not None:
+            try:
+                async with pg_pool.acquire() as conn:
+                    rows = await conn.fetch(
+                        """
+                        SELECT id::text AS space_id, user_id, tenant_id,
+                               goal_text AS title, status
+                        FROM learning_goals
+                        WHERE user_id=$1 AND tenant_id=$2
+                        ORDER BY created_at DESC LIMIT 100
+                        """,
+                        user_id,
+                        tenant_id,
+                    )
+                return {"items": [dict(row) for row in rows], "degraded": []}
+            except Exception as exc:
+                logger.info("list spaces pg degraded: %s", exc)
+        items = [
+            {key: item[key] for key in ("space_id", "title", "status")}
+            for item in self._spaces.values()
+            if item["user_id"] == user_id and item["tenant_id"] == tenant_id
+        ]
+        return {"items": items, "degraded": ["pg:unavailable"]}
 
     # ---------- 创建 ----------
 
@@ -116,6 +107,53 @@ class SpaceStore:
             "progress": 0.0,
         }
         return SpaceDetail(**self._spaces[space_id], degraded=["pg:unavailable"])
+
+    async def update_space(
+        self,
+        space_id: str,
+        *,
+        user_id: str,
+        tenant_id: str,
+        title: str,
+        course: str = "",
+        pg_pool=None,
+    ) -> SpaceDetail | None:
+        clean_title = title.strip()[:200]
+        if not clean_title:
+            return None
+        updated = await update_space_record(
+            space_id,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            title=clean_title,
+            course=course.strip()[:200],
+            memory=self._spaces,
+            pg_pool=pg_pool,
+        )
+        if not updated:
+            return None
+        return await self.get_space_detail(space_id, pg_pool=pg_pool)
+
+    async def delete_space(
+        self,
+        space_id: str,
+        *,
+        user_id: str,
+        tenant_id: str,
+        pg_pool=None,
+    ) -> bool:
+        deleted = await delete_space_record(
+            space_id,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            memory=self._spaces,
+            pg_pool=pg_pool,
+        )
+        if not deleted:
+            return False
+        self._resources.pop(space_id, None)
+        self._paths.pop(space_id, None)
+        return True
 
     # ---------- 聚合详情 ----------
 
