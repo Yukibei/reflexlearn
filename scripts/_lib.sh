@@ -18,6 +18,21 @@ log_header() {
   printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$name"
 }
 
+# .env 是端口的单一事实源。这里只取端口类整数变量，不加载 key 等其余配置，
+# 避免把密钥 export 进 npm/next 等子进程环境。
+env_port() {
+  local key="$1" fallback="$2" env_file="$PROJECT_ROOT/.env" value
+  if [[ -f "$env_file" ]]; then
+    value="$(grep -m1 -E "^[[:space:]]*${key}=" "$env_file" 2>/dev/null || true)"
+    value="$(printf '%s' "${value#*=}" | tr -d '\r "')"
+    if [[ "$value" =~ ^[0-9]+$ ]]; then
+      printf '%s\n' "$value"
+      return
+    fi
+  fi
+  printf '%s\n' "$fallback"
+}
+
 use_local_network() {
   local local_hosts="127.0.0.1,localhost,::1"
   export NO_PROXY="${NO_PROXY:+$NO_PROXY,}$local_hosts"

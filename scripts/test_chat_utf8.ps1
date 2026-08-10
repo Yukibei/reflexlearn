@@ -14,8 +14,10 @@ $body = @{
 
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
 
+$apiPort = if ($env:API_PORT) { $env:API_PORT } else { "28000" }
+
 Invoke-WebRequest `
-    -Uri "http://127.0.0.1:8000/api/chat" `
+    -Uri "http://127.0.0.1:$apiPort/api/chat" `
     -Method Post `
     -ContentType "application/json; charset=utf-8" `
     -Body $bytes

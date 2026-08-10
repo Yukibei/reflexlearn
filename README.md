@@ -47,20 +47,24 @@ bash scripts/init_all.sh
 4. 启动 API：
 
 ```bash
-bash scripts/start_api.sh 8000
+bash scripts/start_api.sh
 ```
 
 5. 启动前端：
 
 ```bash
-bash scripts/start_frontend.sh 3000 http://localhost:8000/api
+bash scripts/start_frontend.sh
 ```
 
 6. 打开前端：
 
 ```text
-http://localhost:3000
+http://127.0.0.1:23002
 ```
+
+端口由 `.env` 的 `API_PORT` / `FRONTEND_PORT` 统一驱动（本机多项目共存，已整体迁到 2xxxx 段），
+脚本第一个位置参数可临时覆盖。前端一律走相对 `/api`，由 Next rewrites 代理到后端——
+不要改回绝对地址，否则 HttpOnly 会话 cookie 会因跨站而丢失。
 
 默认演示账号来自 `.env.example`：
 
@@ -76,19 +80,19 @@ bash scripts/start_core.sh
 bash scripts/start_graph.sh
 bash scripts/start_bigdata.sh
 bash scripts/start_full.sh
-bash scripts/start_api.sh 8000
-bash scripts/start_frontend.sh 3000 http://localhost:8000/api
-bash scripts/check_api.sh 8000
-bash scripts/check_api_security.sh 8000
-bash scripts/check_api_integrations.sh 8000
+bash scripts/start_api.sh
+bash scripts/start_frontend.sh
+bash scripts/check_api.sh
+bash scripts/check_api_security.sh
+bash scripts/check_api_integrations.sh
 bash scripts/check_bigdata.sh
 bash scripts/run_eval.sh --compare --tags ablation --max-cases 2 --timeout 12
 bash scripts/run_real_eval.sh --tags ablation,rag_required --strategies real_full,real_no_rag,single_agent_baseline --max-cases 1 --timeout 180
 bash scripts/run_real_eval.sh --strategies controlled_rag,controlled_reflexion,single_agent_baseline --max-cases 0 --timeout 25
-bash scripts/build_frontend.sh http://localhost:8000/api
+bash scripts/build_frontend.sh
 bash scripts/test_unit.sh
-bash scripts/stop_api.sh 8000
-bash scripts/stop_frontend.sh 3000
+bash scripts/stop_api.sh
+bash scripts/stop_frontend.sh
 bash scripts/stop_all.sh
 ```
 

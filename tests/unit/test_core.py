@@ -157,9 +157,11 @@ def test_api_script_does_not_reload_on_log_writes():
     assert "API_PORT" in text
     assert "API_PORT" in check_text
     assert "API_PORT" in stop_text
-    assert '${1:-${API_PORT:-8000}}' in text
-    assert '${1:-${API_PORT:-8000}}' in check_text
-    assert '${1:-${API_PORT:-8000}}' in stop_text
+    # 端口取值四级：位置参数 > 环境变量 > .env（单一事实源）> 兜底默认。
+    # 本机多项目共存，8000 被占用，应用端口统一迁到 2xxxx 段。
+    assert '${1:-${API_PORT:-$(env_port API_PORT 28000)}}' in text
+    assert '${1:-${API_PORT:-$(env_port API_PORT 28000)}}' in check_text
+    assert '${1:-${API_PORT:-$(env_port API_PORT 28000)}}' in stop_text
 
 
 def test_frontend_scripts_support_port_and_api_base_overrides():
@@ -168,11 +170,14 @@ def test_frontend_scripts_support_port_and_api_base_overrides():
     build_text = (root / "scripts" / "build_frontend.sh").read_text(encoding="utf-8")
     stop_text = (root / "scripts" / "stop_frontend.sh").read_text(encoding="utf-8")
 
-    assert 'FRONTEND_PORT="${1:-${FRONTEND_PORT:-3000}}"' in start_text
+    assert 'FRONTEND_PORT="${1:-${FRONTEND_PORT:-$(env_port FRONTEND_PORT 23002)}}"' in start_text
     # 默认相对 /api：浏览器同源请求经 next.config rewrites 代理到 BACKEND_ORIGIN，
     # HttpOnly 会话 cookie 才能在刷新后随请求发送（绝对地址跨站会丢 cookie）。
     assert 'FRONTEND_API_BASE="${2:-${NEXT_PUBLIC_API_BASE:-/api}}"' in start_text
-    assert 'BACKEND_ORIGIN="${3:-${BACKEND_ORIGIN:-http://127.0.0.1:8000}}"' in start_text
+    assert (
+        'BACKEND_ORIGIN="${3:-${BACKEND_ORIGIN:-http://127.0.0.1:$(env_port API_PORT 28000)}}"'
+        in start_text
+    )
     assert 'NEXT_PUBLIC_API_BASE="$FRONTEND_API_BASE"' in start_text
     assert '--port "$FRONTEND_PORT"' in start_text
     # 当前开发环境是 WSL bash；cmd.exe //C 会打开交互式 cmd 并空跑，必须使用 /C。
@@ -183,12 +188,15 @@ def test_frontend_scripts_support_port_and_api_base_overrides():
         in start_text
     )
     assert 'FRONTEND_API_BASE="${1:-${NEXT_PUBLIC_API_BASE:-/api}}"' in build_text
-    assert 'BACKEND_ORIGIN="${2:-${BACKEND_ORIGIN:-http://127.0.0.1:8000}}"' in build_text
+    assert (
+        'BACKEND_ORIGIN="${2:-${BACKEND_ORIGIN:-http://127.0.0.1:$(env_port API_PORT 28000)}}"'
+        in build_text
+    )
     assert (
         "set NEXT_PUBLIC_API_BASE=$FRONTEND_API_BASE&& set BACKEND_ORIGIN=$BACKEND_ORIGIN&& npm run build"
         in build_text
     )
-    assert 'FRONTEND_PORT="${1:-${FRONTEND_PORT:-3000}}"' in stop_text
+    assert 'FRONTEND_PORT="${1:-${FRONTEND_PORT:-$(env_port FRONTEND_PORT 23002)}}"' in stop_text
 
 
 def test_stop_api_avoids_powershell_reserved_pid_variable():

@@ -9,7 +9,7 @@ ensure_logs
 cd_root
 use_local_network
 use_python_defaults
-export API_PORT="${1:-${API_PORT:-8000}}"
+export API_PORT="${1:-${API_PORT:-$(env_port API_PORT 28000)}}"
 API_BASE="http://127.0.0.1:${API_PORT}"
 
 {

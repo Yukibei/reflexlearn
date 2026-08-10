@@ -9,7 +9,7 @@ cd_root
 use_local_network
 # 默认相对路径 /api（同源代理，见 next.config rewrites）；BACKEND_ORIGIN 决定代理目标。
 FRONTEND_API_BASE="${1:-${NEXT_PUBLIC_API_BASE:-/api}}"
-BACKEND_ORIGIN="${2:-${BACKEND_ORIGIN:-http://127.0.0.1:8000}}"
+BACKEND_ORIGIN="${2:-${BACKEND_ORIGIN:-http://127.0.0.1:$(env_port API_PORT 28000)}}"
 export NEXT_PUBLIC_API_BASE="$FRONTEND_API_BASE"
 export BACKEND_ORIGIN
 

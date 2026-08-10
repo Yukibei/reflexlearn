@@ -13,7 +13,7 @@ use_python_defaults
 # /api/chat 真实 SSE 性能采集：TTFC（首个 resource_card）+ 总时长（done）
 # + LLM 调用按 task_type/status 差分 + resource_card 时间分布（区分生成首帧 vs assemble replay）。
 # 度量是 PERF 优化的验收前提（docs/19 §3/§5）；分离网关 LLM 与端到端以隔离中转站变量。
-PERF_PORT="${1:-8000}"
+PERF_PORT="${1:-$(env_port API_PORT 28000)}"
 
 {
   log_header "check_chat_perf"

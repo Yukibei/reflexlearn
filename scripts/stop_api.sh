@@ -6,7 +6,7 @@ source "$SCRIPT_DIR/_lib.sh"
 
 ensure_logs
 cd_root
-API_PORT="${1:-${API_PORT:-8000}}"
+API_PORT="${1:-${API_PORT:-$(env_port API_PORT 28000)}}"
 
 {
   log_header "stop_api :$API_PORT"

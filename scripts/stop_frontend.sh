@@ -6,7 +6,7 @@ source "$SCRIPT_DIR/_lib.sh"
 
 ensure_logs
 cd_root
-FRONTEND_PORT="${1:-${FRONTEND_PORT:-3002}}"
+FRONTEND_PORT="${1:-${FRONTEND_PORT:-$(env_port FRONTEND_PORT 23002)}}"
 
 {
   log_header "stop_frontend :$FRONTEND_PORT"

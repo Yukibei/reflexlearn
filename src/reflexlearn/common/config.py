@@ -128,8 +128,8 @@ class Settings(BaseSettings):
     mdn_search_timeout_s: float = 6.0
 
     cors_allow_origins: str = (
-        "http://localhost:3000,http://localhost:3001,http://localhost:3002,"
-        "http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:3002"
+        "http://localhost:3000,http://localhost:3001,http://localhost:23002,"
+        "http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:23002"
     )
     trusted_hosts: str = "127.0.0.1,localhost,testserver"
 

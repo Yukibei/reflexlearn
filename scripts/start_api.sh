@@ -10,7 +10,7 @@ use_local_network
 use_python_defaults
 
 export REFLEXLEARN_LOG_FILE="$LOG_DIR/api.log"
-API_PORT="${1:-${API_PORT:-8000}}"
+API_PORT="${1:-${API_PORT:-$(env_port API_PORT 28000)}}"
 
 {
   log_header "start_api :$API_PORT"

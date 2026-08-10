@@ -119,12 +119,16 @@ discuss/                          方案讨论和评审记录
 
 | 服务 | 默认地址 |
 |---|---|
-| 前端 | `http://127.0.0.1:3002` |
-| API | `http://127.0.0.1:8000` |
+| 前端 | `http://127.0.0.1:23002` |
+| API | `http://127.0.0.1:28000` |
 | PostgreSQL | `127.0.0.1:25432` |
 | Redis | `127.0.0.1:26379` |
 | Qdrant HTTP | `http://127.0.0.1:26333` |
 | Neo4j Bolt | `bolt://127.0.0.1:27687` |
+
+端口的单一事实源是 `.env`（`API_PORT` / `FRONTEND_PORT` / `POSTGRES_PORT` 等），脚本统一通过
+`_lib.sh` 的 `env_port` 读取，位置参数可临时覆盖。本机同时运行 docpilot、new-api、medical-ppt、
+个人作品集站等项目，`1xxxx` 段与 `8000`/`3002` 均已被占用，因此本项目整体使用 `2xxxx` 段。
 
 前端必须使用相对地址 `/api`，由 Next.js rewrite 转发到 `BACKEND_ORIGIN`。不要改回浏览器直接跨域请求，否则 HttpOnly 会话 Cookie 在 localhost/127.0.0.1 组合下容易丢失。
 
@@ -133,8 +137,8 @@ discuss/                          方案讨论和评审记录
 ```bash
 bash scripts/start_core.sh
 bash scripts/init_all.sh
-bash scripts/start_api.sh 8000
-bash scripts/start_frontend.sh 3002 /api http://127.0.0.1:8000
+bash scripts/start_api.sh
+bash scripts/start_frontend.sh
 ```
 
 `init_all.sh` 用于首次初始化或明确需要重建基础数据时，不应每次启动都盲目执行。
@@ -142,8 +146,8 @@ bash scripts/start_frontend.sh 3002 /api http://127.0.0.1:8000
 停止服务：
 
 ```bash
-bash scripts/stop_frontend.sh 3002
-bash scripts/stop_api.sh 8000
+bash scripts/stop_frontend.sh
+bash scripts/stop_api.sh
 bash scripts/stop_all.sh
 ```
 
@@ -156,7 +160,10 @@ logs/api.log
 logs/init_all.log
 ```
 
-2026-08-11 交接快照：3002 和 8000 有监听；当时 ReflexLearn 自身的 PostgreSQL、Redis、Qdrant、Neo4j Docker 容器未在 `docker ps` 中出现。接手者必须重新确认依赖，不得因 API 端口存在就假定完整数据链路可用。
+**2026-08-11 交接快照更正**：交接时记录的「3002 和 8000 有监听」并不表示本项目在运行。
+这两个端口当时分别被 medical-ppt-agent（8000）和一个个人作品集站（3002）占用，
+本项目的 API、前端与四个中间件容器**均未运行**。判断本项目是否可用，必须核对
+`/api/health` 返回的 service 名称与 `docker ps` 中的本项目容器，而不是端口是否被监听。
 
 ## 7. 核心运行链路
 
@@ -347,15 +354,15 @@ API 启动会后台预热 embedding 和 reranker。日志可能出现 Hugging Fa
 ```bash
 # 启停与健康
 bash scripts/start_core.sh
-bash scripts/start_api.sh 8000
-bash scripts/start_frontend.sh 3002 /api http://127.0.0.1:8000
-bash scripts/check_api.sh 8000
+bash scripts/start_api.sh
+bash scripts/start_frontend.sh
+bash scripts/check_api.sh
 
 # 用户授权后再运行
 bash scripts/test_unit.sh
-bash scripts/build_frontend.sh /api http://127.0.0.1:8000
-bash scripts/check_api_security.sh 8000
-bash scripts/check_api_integrations.sh 8000
+bash scripts/build_frontend.sh
+bash scripts/check_api_security.sh
+bash scripts/check_api_integrations.sh
 ```
 
 修改后至少执行与文件范围对应的 `git diff --check -- <files>`，并检查日志是否出现类型错误、导入错误或未捕获异常。
