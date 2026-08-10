@@ -1,8 +1,16 @@
-FROM python:3.11-slim
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
+
 WORKDIR /app
-COPY pyproject.toml .
-RUN pip install uv && uv pip install --system -e ".[dev]"
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+COPY pyproject.toml uv.lock README.md ./
 COPY src/ src/
-COPY config/ config/
+COPY scripts/init/ scripts/init/
+RUN uv sync --frozen --no-dev
+
 EXPOSE 8000
-CMD ["uvicorn", "reflexlearn.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/uvicorn", "reflexlearn.main:app", "--host", "0.0.0.0", "--port", "8000"]

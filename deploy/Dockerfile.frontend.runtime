@@ -1,0 +1,11 @@
+ARG BASE_IMAGE=reflexlearn-web:base
+FROM ${BASE_IMAGE}
+WORKDIR /app
+USER root
+RUN find /app -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+COPY frontend/public ./public
+COPY --chown=nextjs:nodejs frontend/.next/standalone ./
+COPY --chown=nextjs:nodejs frontend/.next/static ./.next/static
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]

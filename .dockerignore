@@ -1,0 +1,12 @@
+.git
+.venv
+**/.env
+**/.env.*
+**/__pycache__
+**/*.pyc
+frontend/.next
+frontend/node_modules
+logs
+output
+.pytest_cache
+.playwright-mcp
