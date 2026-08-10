@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { HeroHeader } from "./landing/HeroHeader";
-import { LandingContent } from "./landing/LandingContent";
+import { CtaSection } from "./landing/cta/CtaSection";
+import { LandingShowcase } from "./landing/cta/LandingShowcase";
 
 export default function HeroLanding() {
   return (
@@ -18,7 +19,7 @@ export default function HeroLanding() {
 
       <HeroHeader />
 
-      <section className="fixed inset-0 z-10 flex h-[100svh] flex-col justify-center px-6 pb-16 pt-28 text-center text-foreground sm:px-8">
+      <section className="absolute inset-0 z-10 flex h-[100svh] flex-col justify-center px-6 pb-16 pt-28 text-center text-foreground sm:px-8">
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
           <div className="max-w-5xl">
             <h1
@@ -44,7 +45,7 @@ export default function HeroLanding() {
                 开始学习之旅
               </Link>
               <a
-                href="#capabilities"
+                href="#cta"
                 className="rounded-full px-6 py-4.5 text-sm text-foreground/65 transition-colors hover:text-foreground"
               >
                 了解学习系统 ↓
@@ -54,8 +55,10 @@ export default function HeroLanding() {
         </div>
       </section>
 
-      <div className="relative z-20 pt-[100svh]">
-        <LandingContent />
+      <div aria-hidden="true" className="pointer-events-none h-[100svh]" />
+      <div className="relative z-20">
+        <CtaSection />
+        <LandingShowcase />
       </div>
     </div>
   );

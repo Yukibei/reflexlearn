@@ -1,0 +1,15 @@
+.section {
+  background: linear-gradient(
+    to bottom,
+    rgb(16 23 28 / 0.08) 0%,
+    rgb(16 23 28 / 0.82) 14%,
+    #10171c 34%,
+    #10171c 100%
+  );
+}
+
+.motionLayer {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
