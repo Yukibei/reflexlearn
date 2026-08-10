@@ -10,7 +10,7 @@ export function SpaceNextAction({ detail }: { detail: SpaceDetail }) {
 
   return (
     <aside className="space-y-5">
-      <section className="bg-white p-5 shadow-[0_18px_50px_rgb(5_26_36/0.05)]">
+      <section className="ws-dashboard-card rounded-3xl p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ws-accent)]">
           Next
         </p>
@@ -22,7 +22,7 @@ export function SpaceNextAction({ detail }: { detail: SpaceDetail }) {
         </p>
         <Link
           href="/today"
-          className="mt-5 inline-flex items-center gap-2 bg-[var(--ws-navy)] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-[#ffd85f] px-4 text-sm font-medium text-[#303030] transition hover:bg-[#ffe38b]"
         >
           回到今日学习
           <ArrowRight size={15} aria-hidden />
@@ -37,7 +37,7 @@ export function SpaceNextAction({ detail }: { detail: SpaceDetail }) {
       </section>
 
       {detail.degraded.length > 0 ? (
-        <p className="border-l-2 border-amber-400 bg-amber-50/70 px-4 py-3 text-xs leading-5 text-amber-800">
+        <p className="rounded-2xl border border-[#ffd85f]/70 bg-[#fff4c8]/70 px-4 py-3 text-xs leading-5 text-[#746016]">
           部分学习记录暂时无法同步，当前页面已保留可用内容。
         </p>
       ) : null}
@@ -64,7 +64,7 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-[#f0eee7] hover:text-[var(--ws-ink)]"
+      className="flex items-center gap-3 rounded-2xl bg-white/55 px-4 py-3 text-sm font-medium text-[#747474] transition hover:bg-white/85 hover:text-[#303030]"
     >
       <Icon size={16} className="text-[var(--ws-accent)]" aria-hidden />
       {label}

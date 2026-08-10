@@ -36,8 +36,8 @@ export function CompanionPanel({
   listRef,
 }: CompanionPanelProps) {
   return (
-    <div className="fixed bottom-28 right-4 z-50 flex h-[460px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border border-[var(--ws-line-strong)] bg-[#fdfcf8] shadow-[0_12px_40px_rgb(5_26_36/0.16)]">
-      <header className="border-b border-[var(--ws-line)] bg-[var(--ws-paper)] px-4 py-3">
+    <div className="fixed bottom-28 right-4 z-50 flex h-[460px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-[24px] border border-white/70 bg-white/70 shadow-[0_16px_44px_rgb(48_48_48/0.16)] backdrop-blur-3xl sm:right-6">
+      <header className="border-b border-[#898989]/15 bg-white/35 px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-[var(--ws-ink)]">AI 学伴 · 随身导师</span>
           <button
@@ -54,7 +54,7 @@ export function CompanionPanel({
         </p>
       </header>
 
-      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div ref={listRef} className="ws-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {turns.length === 0 ? (
           <div className="rounded-xl bg-[rgb(5_26_36/0.04)] px-3.5 py-3 text-sm leading-relaxed text-slate-600">
             学习中遇到卡点随时问我：概念解释、题目思路、代码报错都可以。
@@ -80,7 +80,7 @@ export function CompanionPanel({
         {busy ? <CompanionThinking /> : null}
       </div>
 
-      <div className="flex items-end gap-2 border-t border-[var(--ws-line)] bg-white p-3">
+      <div className="flex items-end gap-2 border-t border-[#898989]/15 bg-white/45 p-3">
         <textarea
           value={input}
           onChange={(event) => onInputChange(event.target.value)}
@@ -92,13 +92,13 @@ export function CompanionPanel({
           }}
           rows={1}
           placeholder="例如：为什么我的梯度下降不收敛？"
-          className="max-h-24 min-w-0 flex-1 resize-none rounded-xl border border-[var(--ws-line-strong)] bg-white px-3 py-2 text-sm text-[var(--ws-ink)] outline-none placeholder:text-slate-400 focus:border-[var(--ws-accent)]"
+          className="max-h-24 min-w-0 flex-1 resize-none rounded-2xl border border-[#898989]/20 bg-white/70 px-3 py-2 text-sm text-[#303030] outline-none placeholder:text-[#898989] focus:border-[#ffd85f]"
         />
         <button
           type="button"
           onClick={onAsk}
           disabled={busy || !input.trim()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--ws-ink)] text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#ffd85f] text-[#303030] transition-transform hover:-translate-y-0.5 disabled:opacity-40"
           aria-label="发送问题"
         >
           <Send size={15} aria-hidden />

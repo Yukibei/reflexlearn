@@ -22,7 +22,7 @@ import { PET_SHEET, type PetMood } from "./sprites";
 import { useCompanionRoam } from "./useCompanionRoam";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
-const PET_WIDTH = 92;
+const PET_WIDTH = 80;
 const PET_HEIGHT = Math.round((PET_WIDTH * PET_SHEET.frameHeight) / PET_SHEET.frameWidth);
 const GREET_MS = 1600;
 const DRAG_THRESHOLD_PX = 6;
@@ -132,13 +132,12 @@ export function LearningCompanion() {
     }
     dragOrigin.current = null;
     setDragging(false);
-    // click 事件在 pointerup 之后触发；若 click 未触发（如 pointercancel）下一拍复位。
-    setTimeout(() => {
+    window.setTimeout(() => {
       draggedRef.current = false;
     }, 0);
   };
 
-  const onClick = () => {
+  const onCompanionClick = () => {
     if (draggedRef.current) {
       draggedRef.current = false;
       return;
@@ -180,7 +179,6 @@ export function LearningCompanion() {
         : STATUS_TO_MOOD[status];
   const showStatusChip = status !== "idle" && !open;
 
-  // /chat 本身就是 AI 导师主页面，学伴退场避免双入口；挂载前不渲染避免水合闪烁。
   if (!mounted || pathname.startsWith("/chat")) return null;
 
   return (
@@ -201,7 +199,7 @@ export function LearningCompanion() {
 
       <button
         type="button"
-        onClick={onClick}
+        onClick={onCompanionClick}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
@@ -212,10 +210,14 @@ export function LearningCompanion() {
         onPointerLeave={(event) => {
           if (event.pointerType === "mouse") setHovered(false);
         }}
-        className={`fixed left-0 top-0 z-50 flex touch-none flex-col items-center ${
+        className={`fixed left-0 top-0 z-50 flex touch-none flex-col items-center focus-visible:outline-none focus-visible:drop-shadow-[0_0_8px_#ffd85f] ${
           dragging ? "cursor-grabbing" : "cursor-grab"
         }`}
-        style={{ transform: `translate(${roam.x}px, ${roam.y}px)` }}
+        style={{
+          transform: `translate(${roam.x}px, ${roam.y}px)`,
+          transition: dragging ? "none" : "transform 32ms linear",
+          willChange: "transform",
+        }}
         aria-label={open ? "收起 AI 学伴" : "打开 AI 学伴辅导框"}
       >
         {showStatusChip ? (

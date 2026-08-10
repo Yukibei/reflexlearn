@@ -29,7 +29,7 @@ export function GrowthSummary({ profile, trend, today, traceCount }: GrowthSumma
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
-      <section className="ws-card ws-rise p-6">
+      <section className="ws-dashboard-card ws-rise p-6">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <span className={`ws-stamp ${stamp.className}`}>{stamp.label}</span>
           <div className="text-right">
@@ -54,7 +54,7 @@ export function GrowthSummary({ profile, trend, today, traceCount }: GrowthSumma
           {hasTrend && trend ? (
             <>
               <div className="flex items-baseline justify-between">
-                <p className="ws-eyebrow">Progress Curve · 成长趋势</p>
+            <p className="ws-eyebrow">成长趋势</p>
                 <p className="text-xs text-slate-500">
                   能力变化：跨 {trendPoints} 份快照推进
                   <span
@@ -73,7 +73,7 @@ export function GrowthSummary({ profile, trend, today, traceCount }: GrowthSumma
             </>
           ) : (
             <>
-              <p className="ws-eyebrow">Progress Curve · 成长趋势</p>
+              <p className="ws-eyebrow">成长趋势</p>
               <div className="mt-3">
                 <TrendPlaceholder count={trendPoints} />
               </div>

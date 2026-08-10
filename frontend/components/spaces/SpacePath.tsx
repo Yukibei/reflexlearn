@@ -19,7 +19,7 @@ export function SpacePath({ steps }: { steps: SpacePathStep[] }) {
     return (
       <section className="space-y-3">
         <h2 className="text-xl font-medium text-[var(--ws-ink)]">学习路径</h2>
-        <div className="bg-white px-5 py-6 text-sm leading-6 text-slate-600">
+        <div className="ws-dashboard-card px-5 py-6 text-sm leading-6 text-[#747474]">
           这个目标还没有生成路径。你可以先从一次目标拆解开始，让系统沉淀第一组节点。
         </div>
       </section>
@@ -35,13 +35,13 @@ export function SpacePath({ steps }: { steps: SpacePathStep[] }) {
         <h2 className="mt-2 text-xl font-medium text-[var(--ws-ink)]">按顺序推进的学习路径</h2>
       </div>
 
-      <ol className="space-y-3">
+      <ol className="space-y-3 pr-1">
         {steps.map((step) => {
           const state = stepState(step);
           const Icon = state === "done" ? Check : state === "current" ? CircleDot : MoveRight;
           return (
-            <li key={`${step.sequence}-${step.task_ref}`} className="grid gap-3 bg-white p-4 sm:grid-cols-[42px_1fr]">
-              <span className="flex h-10 w-10 items-center justify-center bg-[#f0eee7] text-[var(--ws-ink)]">
+            <li key={`${step.sequence}-${step.task_ref}`} className="ws-dashboard-card grid gap-3 rounded-3xl p-4 sm:grid-cols-[42px_1fr]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#303030] text-white">
                 <Icon size={17} aria-hidden />
               </span>
               <div>

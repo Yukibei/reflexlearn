@@ -38,7 +38,7 @@ export default function ProfilePage() {
   }, [auth.access_token]);
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Learner Profile"
         title="学习画像"
@@ -47,14 +47,14 @@ export default function ProfilePage() {
           <>
             <Link
               href="/chat"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--ws-navy)] px-3.5 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgb(5_26_36/0.2)] transition-opacity hover:opacity-90"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#ffd85f] px-4 text-sm font-medium text-[#303030] shadow-[0_2px_12px_rgb(48_48_48/0.1)] transition hover:bg-[#ffe38b]"
             >
               <MessageSquareText size={15} aria-hidden />
               更新画像
             </Link>
             <Link
               href="/today"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--ws-line-strong)] bg-white px-3.5 py-2 text-sm font-medium text-[var(--ws-ink)] transition-colors hover:border-[var(--ws-navy)]"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#898989]/20 bg-white/65 px-4 text-sm font-medium text-[#303030] transition hover:bg-white"
             >
               <RotateCcw size={15} aria-hidden />
               回到今日学习

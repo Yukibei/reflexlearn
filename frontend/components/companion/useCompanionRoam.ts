@@ -3,44 +3,36 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CompanionRoamOptions {
-  /** false 时原地冻结（答题中 / 悬停 / 问候播放中），不自动走动。 */
   active: boolean;
-  /** true 时走回右下角家位并停留（面板打开时）。 */
   goHome: boolean;
-  /** 拖拽进行中：暂停自动走动，位置完全由 place() 驱动。 */
   dragging: boolean;
   petWidth: number;
   petHeight: number;
 }
 
 export interface CompanionRoamState {
-  /** 距视口左缘 / 上缘的 px 偏移。 */
   x: number;
   y: number;
-  /** 1 = 面朝左（精灵原始朝向），-1 = 面朝右。 */
   facing: 1 | -1;
   walking: boolean;
 }
 
 export interface CompanionRoamApi extends CompanionRoamState {
-  /** 直接放置学伴（拖拽落点），位置会被夹回视口内并原地休息。 */
   place: (x: number, y: number) => void;
 }
-
-const EDGE = 16;
-/** 顶部留白更大，避免盖住页头与导航。 */
-const TOP_EDGE = 96;
-const SPEED_PX_S = 76;
-const TICK_MS = 50;
-const REST_MIN_MS = 2600;
-const REST_MAX_MS = 7000;
-/** 小屏不自动漫游：避免学伴在移动端横穿内容、遮挡底部操作（仍可拖拽）。 */
-const ROAM_MIN_VIEWPORT = 768;
 
 interface Point {
   x: number;
   y: number;
 }
+
+const EDGE = 16;
+const TOP_EDGE = 96;
+const SPEED_PX_S = 76;
+const TICK_MS = 32;
+const REST_MIN_MS = 1400;
+const REST_MAX_MS = 3600;
+const ROAM_MIN_VIEWPORT = 768;
 
 function bounds(petWidth: number, petHeight: number): { max: Point; home: Point } {
   if (typeof window === "undefined") {
@@ -80,7 +72,7 @@ export function useCompanionRoam({
     const onResize = () => {
       const { max } = bounds(petWidth, petHeight);
       target.current = clampPoint(target.current, max);
-      setState((s) => ({ ...s, ...clampPoint(s, max) }));
+      setState((current) => ({ ...current, ...clampPoint(current, max) }));
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -93,48 +85,48 @@ export function useCompanionRoam({
       const spot = clampPoint({ x, y }, max);
       target.current = spot;
       nextDecisionAt.current = Date.now() + REST_MIN_MS;
-      setState((s) => ({ ...s, ...spot, walking: false }));
+      setState((current) => ({ ...current, ...spot, walking: false }));
     },
     [petWidth, petHeight],
   );
 
   useEffect(() => {
     if (!active || dragging || reducedMotion.current) return;
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       const now = Date.now();
       const { max, home } = bounds(petWidth, petHeight);
       const roamAllowed = window.innerWidth >= ROAM_MIN_VIEWPORT;
       if (goHome) target.current = home;
-      setState((prev) => {
-        const dx = target.current.x - prev.x;
-        const dy = target.current.y - prev.y;
+      setState((current) => {
+        const dx = target.current.x - current.x;
+        const dy = target.current.y - current.y;
         const distance = Math.hypot(dx, dy);
         if (distance > 4) {
           const step = (SPEED_PX_S * TICK_MS) / 1000;
           const ratio = Math.min(1, step / distance);
-          const next = clampPoint({ x: prev.x + dx * ratio, y: prev.y + dy * ratio }, max);
+          const next = clampPoint(
+            { x: current.x + dx * ratio, y: current.y + dy * ratio },
+            max,
+          );
           return {
             ...next,
-            facing: Math.abs(dx) > 1 ? (dx < 0 ? 1 : -1) : prev.facing,
+            facing: Math.abs(dx) > 1 ? (dx < 0 ? 1 : -1) : current.facing,
             walking: true,
           };
         }
         if (!goHome && roamAllowed && now >= nextDecisionAt.current) {
-          // 到站休息后再决定下一段散步：55% 漫步到随机位置，45% 继续发呆。
           nextDecisionAt.current =
             now + REST_MIN_MS + Math.random() * (REST_MAX_MS - REST_MIN_MS);
-          if (Math.random() < 0.55) {
-            target.current = {
-              x: EDGE + Math.random() * (max.x - EDGE),
-              y: TOP_EDGE + Math.random() * (max.y - TOP_EDGE),
-            };
-          }
+          target.current = {
+            x: EDGE + Math.random() * (max.x - EDGE),
+            y: TOP_EDGE + Math.random() * (max.y - TOP_EDGE),
+          };
         }
-        return prev.walking ? { ...prev, walking: false } : prev;
+        return current.walking ? { ...current, walking: false } : current;
       });
     }, TICK_MS);
-    return () => clearInterval(timer);
-  }, [active, goHome, dragging, petWidth, petHeight]);
+    return () => window.clearInterval(timer);
+  }, [active, dragging, goHome, petHeight, petWidth]);
 
   return { ...state, place };
 }

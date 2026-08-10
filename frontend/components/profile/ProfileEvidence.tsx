@@ -188,7 +188,7 @@ function PreferenceLine({
 }) {
   const Icon = icon === "brain" ? Brain : SlidersHorizontal;
   return (
-    <div className="border border-dashed border-[var(--ws-line-strong)] bg-[rgb(5_26_36/0.02)] p-3">
+    <div className="border-l border-[#898989]/20 pl-3">
       <div className="flex items-center gap-2 text-xs text-slate-500">
         <Icon size={14} className="text-slate-400" aria-hidden />
         <span>{label}</span>

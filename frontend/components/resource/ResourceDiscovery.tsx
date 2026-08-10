@@ -32,7 +32,7 @@ export function ResourceDiscovery({ profile, today, resources }: ResourceDiscove
 
   return (
     <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-      <WsCard title="按当前画像推荐" eyebrow="Discovery">
+      <WsCard title="按当前画像推荐" eyebrow="推荐入口">
         <p className="text-sm leading-6 text-slate-600">
           资源推荐会优先看当前目标、薄弱点、错题模式和偏好的学习形式。
           你不需要在资料海里重新筛一遍，先从系统已经判断出的卡点开始。
@@ -67,7 +67,7 @@ export function ResourceDiscovery({ profile, today, resources }: ResourceDiscove
         </div>
       </WsCard>
 
-      <WsCard title="按学习目标搜索" eyebrow="Search">
+      <WsCard title="按学习目标搜索" eyebrow="外部检索">
         <div className="flex items-start gap-3">
           <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--ws-paper)] text-[var(--ws-ink)]">
             <Search size={17} aria-hidden />
@@ -80,14 +80,14 @@ export function ResourceDiscovery({ profile, today, resources }: ResourceDiscove
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 href="/chat"
-                className="inline-flex items-center gap-1.5 bg-[var(--ws-navy)] px-3.5 py-2 text-sm font-medium text-white hover:opacity-90"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#ffd85f] px-4 text-sm font-medium text-[#303030] hover:bg-[#ffe38b]"
               >
                 <MessageSquareText size={15} aria-hidden />
                 让 AI 导师筛选资源
               </Link>
               <Link
                 href="/knowledge"
-                className="inline-flex items-center gap-1.5 border border-[var(--ws-line-strong)] bg-white px-3.5 py-2 text-sm font-medium text-[var(--ws-ink)] hover:border-[var(--ws-navy)]"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#898989]/20 bg-white/65 px-4 text-sm font-medium text-[#303030] hover:bg-white"
               >
                 <BookOpenText size={15} aria-hidden />
                 上传课程资料
@@ -125,10 +125,10 @@ function SourceLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="border border-[var(--ws-line)] bg-white p-3 transition-colors hover:border-[var(--ws-navy)]"
+      className="border-t border-[#898989]/15 py-3 transition-colors hover:text-[#303030] md:border-l md:border-t-0 md:px-3 md:first:border-l-0 md:first:pl-0"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="flex h-8 w-8 items-center justify-center bg-[var(--ws-paper)] text-[var(--ws-ink)]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#e3e5e6] text-[var(--ws-ink)]">
           <Icon size={16} aria-hidden />
         </span>
         <ExternalLink size={13} className="text-slate-400" aria-hidden />

@@ -23,6 +23,12 @@
   --color-glass-cyan: #7dd3fc;
   --color-glass-mint: #86efac;
   --color-glass-ember: #fda4af;
+  --color-landing-surface: rgb(255 255 255 / 0.1);
+  --color-landing-surface-hover: rgb(255 255 255 / 0.16);
+  --color-landing-border: rgb(255 255 255 / 0.1);
+  --color-landing-border-strong: rgb(255 255 255 / 0.2);
+  --color-landing-text: rgb(255 255 255 / 0.8);
+  --color-landing-text-muted: rgb(255 255 255 / 0.6);
   --blur-glass-soft: 18px;
   --blur-glass-strong: 30px;
   --radius-glass-card: 20px;
@@ -49,37 +55,45 @@
   --input: 0 0% 18%;
 }
 
-/* 液态玻璃（导航 CTA 与 hero 按钮）：亮度混合 + 上下渐变描边 */
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url("/fonts/material-symbols-outlined.woff2") format("woff2");
 }
-.liquid-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.4px;
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%,
-    rgba(255, 255, 255, 0.15) 80%, rgba(255, 255, 255, 0.45) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.material-symbols-outlined {
+  display: inline-block;
+  overflow: hidden;
+  font-family: "Material Symbols Outlined" !important;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
 }
 
 @keyframes fade-rise {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -90,10 +104,18 @@
   animation: fade-rise 0.8s ease-out both;
 }
 .animate-fade-rise-delay {
-  animation: fade-rise 0.8s ease-out 0.2s both;
+  animation: fade-rise 0.8s ease-out 0.25s both;
 }
 .animate-fade-rise-delay-2 {
-  animation: fade-rise 0.8s ease-out 0.4s both;
+  animation: fade-rise 0.8s ease-out 0.5s both;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
 }
 
 @keyframes marquee {
@@ -511,6 +533,10 @@ html,
 body {
   height: 100%;
   scrollbar-width: none;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html::-webkit-scrollbar,

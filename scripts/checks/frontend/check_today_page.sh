@@ -71,7 +71,8 @@ forbid_text() {
 
   require_text "$NAV_FILE" "href: \"/today\""
   require_text "$AUTH_GATE" "router.replace(\"/today\")"
-  require_text "$SIDE_NAV" "lg:w-[72px]"
+  require_text "$SIDE_NAV" 'aria-label="工作台导航"'
+  require_text "$SIDE_NAV" 'aria-label={open ? "收起导航" : "展开导航"}'
 
   for word in demo mock "local draft" "coming soon" "will be connected later" "工作台"; do
     forbid_text "$TODAY_PAGE" "$word"

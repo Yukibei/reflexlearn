@@ -56,7 +56,7 @@ export default function ResourceDetailPage({
 
   if (loading) {
     return (
-      <section className="mx-auto w-full max-w-4xl space-y-6">
+      <section className="ws-page mx-auto w-full max-w-4xl">
         <div className="ws-skeleton h-8 w-40" />
         <div className="ws-skeleton h-64" />
         <div className="ws-skeleton h-40" />
@@ -66,7 +66,7 @@ export default function ResourceDetailPage({
 
   if (error || !detail) {
     return (
-      <section className="mx-auto w-full max-w-4xl space-y-6">
+      <section className="ws-page mx-auto w-full max-w-4xl">
         <BackLink />
         <EmptyState
           icon={FileQuestion}
@@ -83,7 +83,7 @@ export default function ResourceDetailPage({
   const stamp = STATUS_STAMP[detail.study_status] ?? STATUS_STAMP.unread;
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <section className="ws-page mx-auto max-w-4xl">
       <BackLink />
 
       <header className="ws-card ws-rise p-6">
@@ -207,7 +207,7 @@ function RelatedCard({
 }) {
   const body = (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--ws-paper)] text-[var(--ws-ink)]">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e3e5e6] text-[var(--ws-ink)]">
         <Icon size={16} aria-hidden />
       </span>
       <div>
@@ -220,11 +220,11 @@ function RelatedCard({
     return (
       <Link
         href={href}
-        className="border border-[var(--ws-line)] bg-white p-4 transition-colors hover:border-[var(--ws-navy)]"
+        className="ws-dashboard-card rounded-2xl p-4 transition-colors hover:bg-white/80"
       >
         {body}
       </Link>
     );
   }
-  return <div className="border border-[var(--ws-line)] bg-white p-4">{body}</div>;
+  return <div className="ws-dashboard-card rounded-2xl p-4">{body}</div>;
 }

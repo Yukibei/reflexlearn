@@ -38,6 +38,11 @@ export default function SpacesPage() {
     reload();
   }, [reload]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("create") === "1") setCreating(true);
+  }, []);
+
   const createSpace = async () => {
     const trimmed = title.trim();
     if (!trimmed || submitting) return;
@@ -58,7 +63,7 @@ export default function SpacesPage() {
   };
 
   return (
-    <section className="space-y-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Spaces"
         title="学习空间"
@@ -73,13 +78,13 @@ export default function SpacesPage() {
       />
 
       {creating ? (
-        <div className="ws-card flex flex-wrap items-center gap-3 p-4">
+        <div className="ws-dashboard-card flex flex-wrap items-center gap-3 p-4">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && createSpace()}
             placeholder="例如：两周掌握机器学习基础"
-            className="min-w-0 flex-1 rounded-xl border border-[var(--ws-line-strong)] bg-white px-3.5 py-2.5 text-sm text-[var(--ws-ink)] outline-none placeholder:text-slate-400 focus:border-[var(--ws-navy)]"
+            className="min-w-0 flex-1 rounded-2xl border border-[#898989]/20 bg-white/75 px-4 py-3 text-sm text-[#303030] outline-none placeholder:text-[#898989] focus:border-[#303030]"
             autoFocus
           />
           <WsButton variant="primary" onClick={createSpace} disabled={submitting || !title.trim()}>
@@ -89,13 +94,13 @@ export default function SpacesPage() {
       ) : null}
 
       {error ? (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p className="ws-card rounded-2xl border-rose-200/70 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="ws-skeleton h-28" />
           ))}
@@ -114,24 +119,24 @@ export default function SpacesPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="ws-scroll grid max-h-[calc(100dvh-250px)] gap-4 pr-1 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => {
             const status = statusMeta(item.status);
             return (
               <Link
                 key={item.space_id}
                 href={`/spaces/${item.space_id}`}
-                className="ws-card group block p-5 transition-shadow hover:shadow-[0_4px_16px_rgb(5_26_36/0.08)]"
+                className="ws-dashboard-card group block rounded-3xl p-5 transition duration-200 hover:-translate-y-0.5 hover:bg-white/78"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[rgb(5_26_36/0.05)] text-slate-500">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#303030] text-white">
                     <FolderOpen size={17} aria-hidden />
                   </span>
                   <Tag tone={status.tone}>{status.label}</Tag>
                 </div>
                 <h3 className="mt-3 font-medium text-[var(--ws-ink)]">{item.title}</h3>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-slate-400 transition-colors group-hover:text-cyan-700">
-                  打开空间 <ArrowRight size={12} aria-hidden />
+                <span className="mt-3 inline-flex items-center gap-1 text-xs text-[#747474] transition-colors group-hover:text-[#303030]">
+                  查看与管理 <ArrowRight size={12} aria-hidden />
                 </span>
               </Link>
             );

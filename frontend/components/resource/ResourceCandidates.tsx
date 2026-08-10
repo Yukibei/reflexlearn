@@ -33,21 +33,21 @@ export function ResourceCandidates({ candidates, token, onSaved }: ResourceCandi
   return (
     <section className="space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ws-accent)]">
-          Candidate Resources
+        <p className="ws-eyebrow">
+          候选资源
         </p>
         <h2 className="mt-2 text-xl font-medium text-[var(--ws-ink)]">发现到的候选资源</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
           看准了就保存进资源库，它会进入今日学习和路径推荐的循环。
         </p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="ws-scroll grid max-h-[580px] gap-3 pr-1 lg:grid-cols-3">
         {candidates.map((item) => {
           const view = viewForResource(item.type);
           const Icon = view.icon;
           const state = states[item.resource_id] ?? "idle";
           return (
-            <article key={item.resource_id} className="flex flex-col border border-[var(--ws-line)] bg-white p-4">
+            <article key={item.resource_id} className="ws-dashboard-card flex flex-col rounded-3xl p-4">
               <div className="flex items-start justify-between gap-3">
                 <span className={`flex h-9 w-9 items-center justify-center ${view.tone}`}>
                   <Icon size={16} aria-hidden />
@@ -102,7 +102,7 @@ function SaveButton({ state, onClick }: { state: SaveState; onClick: () => void 
       type="button"
       onClick={onClick}
       disabled={state === "saving"}
-      className="inline-flex items-center gap-1.5 bg-[var(--ws-navy)] px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+      className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#303030] px-3.5 text-sm font-medium text-white transition hover:bg-[#4a4a4a] disabled:opacity-50"
     >
       <BookmarkPlus size={15} aria-hidden />
       {state === "saving" ? "保存中…" : state === "error" ? "重试保存" : "保存到资源库"}

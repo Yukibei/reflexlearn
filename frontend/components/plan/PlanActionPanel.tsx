@@ -19,7 +19,7 @@ interface PlanActionPanelProps {
 export function PlanActionPanel({ task, resources, reviews }: PlanActionPanelProps) {
   return (
     <aside className="space-y-5">
-      <WsCard title="下一步行动" eyebrow="Next">
+      <WsCard title="下一步行动" eyebrow="下一步">
         <p className="text-base font-medium text-[var(--ws-ink)]">{task.title}</p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{task.reason}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
@@ -34,8 +34,8 @@ export function PlanActionPanel({ task, resources, reviews }: PlanActionPanelPro
         </div>
       </WsCard>
 
-      <WsCard title="关联资源" eyebrow="Resources">
-        <div className="space-y-4">
+      <WsCard title="关联资源" eyebrow="资源">
+        <div className="space-y-4 pr-1">
           {resources.slice(0, 4).map((resource) => (
             <article key={resource.id} className="border-b border-[var(--ws-line)] pb-4 last:border-0 last:pb-0">
               <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -52,7 +52,7 @@ export function PlanActionPanel({ task, resources, reviews }: PlanActionPanelPro
         </div>
       </WsCard>
 
-      <WsCard title="复习提醒" eyebrow="Review">
+      <WsCard title="复习提醒" eyebrow="复习">
         {reviews.length === 0 ? (
           <p className="text-sm leading-6 text-slate-600">当前没有需要插入路径的复习项。</p>
         ) : (
@@ -90,8 +90,8 @@ function ActionLink({
   primary?: boolean;
 }) {
   const className = primary
-    ? "bg-[var(--ws-navy)] text-white shadow-[0_1px_2px_rgb(5_26_36/0.2)] hover:opacity-90"
-    : "border border-[var(--ws-line-strong)] bg-white text-[var(--ws-ink)] hover:border-[var(--ws-navy)]";
+    ? "rounded-full bg-[#ffd85f] text-[#303030] hover:bg-[#ffe38b]"
+    : "rounded-full border border-[#898989]/20 bg-white/65 text-[#303030] hover:bg-white";
   return (
     <Link
       href={href}

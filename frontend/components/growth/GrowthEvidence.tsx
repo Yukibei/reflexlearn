@@ -76,7 +76,7 @@ export function GrowthEvidence({ profile, trend, today, traces, reviews }: Growt
       </WsCard>
 
       <WsCard title="学习证据" eyebrow="Evidence">
-        <div className="space-y-4">
+        <div className="ws-scroll max-h-[520px] space-y-4 pr-1">
           <EvidenceLine
             icon={BookOpenText}
             label="当前主任务"
@@ -134,7 +134,7 @@ function EvidenceLine({
   value: string;
 }) {
   return (
-    <div className="border border-[var(--ws-line)] bg-[rgb(5_26_36/0.02)] p-3">
+    <div className="border-l border-[#898989]/20 pl-3">
       <div className="flex items-center gap-2 text-xs text-slate-500">
         <Icon size={14} className="text-slate-400" aria-hidden />
         <span>{label}</span>

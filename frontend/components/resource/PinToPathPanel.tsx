@@ -69,7 +69,7 @@ export function PinToPathPanel({ token, resourceId }: PinToPathPanelProps) {
 
   if (pinnedNode) {
     return (
-      <div className="flex items-center gap-2 border border-[var(--ws-accent)] bg-[rgb(5_26_36/0.03)] px-3 py-2 text-sm text-[var(--ws-accent)]">
+      <div className="flex items-center gap-2 rounded-2xl border border-[#ffd85f]/70 bg-[#fff4c8]/70 px-3 py-2 text-sm text-[#746016]">
         <Pin size={14} aria-hidden />
         已固定到路径节点「{pinnedNode.title}」
       </div>
@@ -78,7 +78,7 @@ export function PinToPathPanel({ token, resourceId }: PinToPathPanelProps) {
 
   if (phase === "saved") {
     return (
-      <div className="flex items-center gap-2 border border-[var(--ws-accent)] bg-[rgb(5_26_36/0.03)] px-3 py-2 text-sm text-[var(--ws-accent)]">
+      <div className="flex items-center gap-2 rounded-2xl border border-[#ffd85f]/70 bg-[#fff4c8]/70 px-3 py-2 text-sm text-[#746016]">
         <Check size={14} aria-hidden />
         已加入路径节点「{savedTitle}」
       </div>
@@ -108,12 +108,12 @@ export function PinToPathPanel({ token, resourceId }: PinToPathPanelProps) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border border-[var(--ws-line)] bg-white p-3">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#898989]/15 bg-white/60 p-3">
       <span className="ws-eyebrow">绑定到节点</span>
       <select
         value={selected ?? ""}
         onChange={(e) => setSelected(Number(e.target.value))}
-        className="min-w-0 flex-1 border border-[var(--ws-line-strong)] bg-white px-2.5 py-1.5 text-sm text-[var(--ws-ink)] focus:border-[var(--ws-navy)] focus:outline-none"
+        className="min-w-0 flex-1 rounded-xl border border-[#898989]/20 bg-white/75 px-2.5 py-1.5 text-sm text-[var(--ws-ink)] focus:border-[#303030] focus:outline-none"
       >
         {realNodes.map((n) => (
           <option key={n.item_id} value={n.item_id ?? ""}>

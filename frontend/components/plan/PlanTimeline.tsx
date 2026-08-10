@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check, CircleDot, MoveRight, Pin } from "lucide-react";
 
 import { updatePlanItemStatus } from "@/lib/planApi";
-import { WsCard } from "@/components/workspace";
+import { EmptyState, WsCard } from "@/components/workspace";
 import { viewForResource } from "@/components/resource/resourceView";
 import type { TodayLearningPathNode } from "@/lib/types";
 
@@ -37,23 +37,25 @@ function StatusIcon({ status }: { status: TodayLearningPathNode["status"] }) {
 export function PlanTimeline({ nodes, progress, recommendation, token, onChanged }: PlanTimelineProps) {
   const percent = Math.min(100, Math.max(0, Math.round(progress * 100)));
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [failedId, setFailedId] = useState<number | null>(null);
 
   const markDone = async (itemId: number) => {
     // 凭据走 HttpOnly cookie，token 生产为空串，不作为可用性判据；apiJson 自带 cookie
     if (savingId !== null) return;
     setSavingId(itemId);
+    setFailedId(null);
     try {
       await updatePlanItemStatus(token ?? "", itemId, "done");
       onChanged?.();
     } catch {
-      /* 失败保持原状态，用户可重试 */
+      setFailedId(itemId);
     } finally {
       setSavingId(null);
     }
   };
 
   return (
-    <WsCard title="当前学习路径" eyebrow="Itinerary">
+    <WsCard title="当前学习路径" eyebrow="路径进度">
       <div className="mb-7">
         <div className="flex items-baseline justify-between text-xs text-slate-500">
           <span>路径推进</span>
@@ -71,8 +73,16 @@ export function PlanTimeline({ nodes, progress, recommendation, token, onChanged
         </div>
       </div>
 
-      <ol>
-        {nodes.map((node, index) => {
+      {nodes.length === 0 ? (
+        <EmptyState
+          icon={CircleDot}
+          title="路径节点尚未生成"
+          description="先在今日学习或 AI 导师中完成一次目标拆解，真实节点会回流到这里。"
+          framed={false}
+        />
+      ) : (
+        <ol className="space-y-0 pr-1">
+          {nodes.map((node, index) => {
           const meta = STATUS_META[node.status];
           const isCurrent = node.status === "current";
           const isDone = node.status === "done";
@@ -112,7 +122,7 @@ export function PlanTimeline({ nodes, progress, recommendation, token, onChanged
               </div>
 
               <article
-                className={`border bg-white p-4 ${
+                className={`rounded-2xl border bg-white/58 p-4 ${
                   isCurrent
                     ? "border-[var(--ws-navy)] shadow-[0_2px_8px_rgb(5_26_36/0.08)]"
                     : "border-[var(--ws-line)]"
@@ -160,17 +170,22 @@ export function PlanTimeline({ nodes, progress, recommendation, token, onChanged
                     type="button"
                     onClick={() => markDone(node.item_id as number)}
                     disabled={savingId !== null}
-                    className="mt-3 inline-flex items-center gap-1.5 border border-[var(--ws-line-strong)] bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-[var(--ws-accent)] hover:text-[var(--ws-accent)] disabled:opacity-50"
+                    className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-[#898989]/20 bg-white/70 px-3.5 text-xs font-medium text-[#303030] transition hover:bg-[#ffd85f] disabled:opacity-50"
                   >
                     <Check size={13} aria-hidden />
-                    {savingId === node.item_id ? "保存中…" : "标记完成"}
+                    {savingId === node.item_id
+                      ? "保存中…"
+                      : failedId === node.item_id
+                        ? "保存失败，重试"
+                        : "标记完成"}
                   </button>
                 ) : null}
               </article>
             </li>
           );
-        })}
-      </ol>
+          })}
+        </ol>
+      )}
 
       <p className="mt-7 border-t border-dashed border-[var(--ws-line-strong)] pt-4 text-sm leading-6 text-slate-600">
         <span className="ws-eyebrow mr-2">Why</span>

@@ -141,7 +141,7 @@ export function DossierStat({
 }) {
   const counted = useCountUp(value);
   return (
-    <div className="ws-card p-4">
+    <div className="ws-dashboard-card p-4">
       <p className="text-xs tracking-wide text-slate-500">{label}</p>
       <p className="ws-serif mt-2 text-4xl leading-none text-[var(--ws-ink)]">{counted}</p>
       <p className="mt-2 border-t border-dashed border-[var(--ws-line-strong)] pt-2 text-xs leading-5 text-slate-500">

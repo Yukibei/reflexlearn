@@ -2,15 +2,15 @@ import type { ButtonHTMLAttributes } from "react";
 
 const VARIANTS = {
   primary:
-    "bg-[var(--ws-navy)] text-white shadow-[0_1px_2px_rgb(5_26_36/0.2)] hover:opacity-90",
+    "bg-[#ffd85f] text-[#303030] shadow-[0_2px_12px_rgb(48_48_48/0.1)] hover:bg-[#ffe38b]",
   outline:
-    "border border-[var(--ws-line-strong)] bg-white text-[var(--ws-ink)] hover:border-[var(--ws-navy)]",
-  ghost: "text-slate-600 hover:bg-[rgb(5_26_36/0.05)] hover:text-[var(--ws-ink)]",
+    "border border-[#898989]/20 bg-white/60 text-[#303030] shadow-[inset_0_1px_0_rgb(255_255_255/0.72)] hover:bg-white/90",
+  ghost: "text-[#747474] hover:bg-white/55 hover:text-[#303030]",
 } as const;
 
 const SIZES = {
-  sm: "px-2.5 py-1.5 text-xs",
-  md: "px-3.5 py-2 text-sm",
+  sm: "h-8 px-3 text-xs",
+  md: "h-10 px-4 text-sm",
 } as const;
 
 type WsButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -29,7 +29,7 @@ export function WsButton({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className ?? ""}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full font-medium transition duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#303030]/35 disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className ?? ""}`}
       {...props}
     >
       {children}

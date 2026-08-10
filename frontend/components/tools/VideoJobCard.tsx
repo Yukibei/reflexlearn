@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Clapperboard, ExternalLink } from "lucide-react";
 import { apiJson, authFetch, getErrorMessage } from "@/lib/apiClient";
 import type { VideoJob } from "@/lib/types";
 
@@ -21,9 +22,9 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  done: "bg-emerald-500",
-  degraded: "bg-amber-500",
-  failed: "bg-rose-500",
+  done: "bg-[#303030] text-white",
+  degraded: "bg-[#ffd85f] text-[#303030]",
+  failed: "bg-rose-500 text-white",
 };
 
 /** M4-F 多模态视频作业：提交 storyboard → POST /api/video/jobs → 2s 轮询 GET 直到 settled。 */
@@ -88,34 +89,36 @@ export function VideoJobCard({ token }: VideoJobCardProps) {
 
   return (
     <div className="space-y-3 border-t border-slate-100 pt-4">
-      <h3 className="text-sm font-semibold text-slate-700">🎬 多模态视频生成（SeeDance）</h3>
+      <h3 className="flex items-center gap-2 text-sm font-medium text-[#303030]">
+        <Clapperboard size={15} aria-hidden /> 多模态视频生成（SeeDance）
+      </h3>
       <textarea
         value={storyboard}
         onChange={(e) => setStoryboard(e.target.value)}
         placeholder="粘贴分镜脚本（storyboard），或用对话生成「多模态视频」资源后复制其内容…"
         rows={3}
-        className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+        className="w-full rounded-2xl border border-[#898989]/20 bg-white/70 p-3 text-sm outline-none focus:border-[#303030]"
       />
       <button
         onClick={submit}
         disabled={!storyboard.trim() || busy}
-        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-40"
+        className="rounded-full bg-[#ffd85f] px-4 py-2 text-sm font-medium text-[#303030] transition hover:bg-[#ffe38b] disabled:opacity-40"
       >
         {status === "submitting" ? "提交中…" : status === "polling" ? "生成中…（轮询）" : "生成视频"}
       </button>
 
       {status === "error" && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
           {error}
         </div>
       )}
 
       {job && (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+        <div className="rounded-2xl border border-[#898989]/15 bg-white/45 p-3 text-sm">
           <div className="flex items-center gap-2">
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${
-                STATUS_BADGE[job.status] || "bg-indigo-500"
+              className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                STATUS_BADGE[job.status] || "bg-[#303030] text-white"
               }`}
             >
               {STATUS_LABEL[job.status] || job.status}
@@ -127,15 +130,15 @@ export function VideoJobCard({ token }: VideoJobCardProps) {
               href={job.video_url}
               target="_blank"
               rel="noreferrer"
-              className="mt-2 inline-block text-indigo-600 underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-[#303030] underline underline-offset-4"
             >
-              ▶ 查看生成的视频
+              查看生成的视频 <ExternalLink size={13} aria-hidden />
             </a>
           )}
           {job.status === "degraded" && (
             <div className="mt-2">
               <div className="text-xs text-amber-600">SeeDance 未配置，展示分镜脚本占位：</div>
-              <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-white p-2 text-xs text-slate-600">
+              <pre className="ws-scroll mt-1 max-h-40 whitespace-pre-wrap rounded-2xl bg-white/70 p-3 text-xs text-slate-600">
                 {job.storyboard}
               </pre>
             </div>

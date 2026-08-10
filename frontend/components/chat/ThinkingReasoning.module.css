@@ -1,0 +1,169 @@
+.tr {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  max-width: 100%;
+  min-height: 20px;
+  animation: tr-block-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: min-height 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tr-block-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.trHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.trHeader.isClickable {
+  cursor: pointer;
+}
+
+.trLabel {
+  color: color-mix(in srgb, #747474 68%, transparent);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0;
+}
+
+.trVerb {
+  color: #626262;
+}
+
+.trChevron {
+  color: #898989;
+  transform: rotate(180deg);
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trHeader[aria-expanded="true"] .trChevron {
+  transform: rotate(0deg);
+}
+
+.trHeader.isClickable:hover .trChevron {
+  color: #303030;
+}
+
+.trCollapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease;
+}
+
+.trCollapsible.isCollapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.trViewport {
+  margin-top: 6px;
+  overflow: hidden;
+  transition: height 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trViewport.isScroll {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.trViewport.isScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.trStream {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.trSentence {
+  display: -webkit-box;
+  height: 34px;
+  margin: 0;
+  overflow: hidden;
+  color: #747474;
+  font-size: 13px;
+  font-weight: 425;
+  line-height: 17px;
+  letter-spacing: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  animation: tr-sentence-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tr-sentence-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.trShimmer {
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    #747474 0%,
+    #747474 30%,
+    rgb(116 116 116 / 0.38) 45%,
+    rgb(116 116 116 / 0.38) 55%,
+    #747474 70%,
+    #747474 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tr-shine 2.25s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+@keyframes tr-shine {
+  0%,
+  18% {
+    background-position: 100% 0;
+  }
+  82%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr,
+  .trCollapsible,
+  .trViewport,
+  .trStream,
+  .trSentence,
+  .trShimmer,
+  .trChevron {
+    animation: none;
+    transition: none;
+  }
+}

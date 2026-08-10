@@ -28,31 +28,31 @@ export default function KnowledgePage() {
   }, [auth.access_token]);
 
   return (
-    <section className="space-y-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Knowledge"
         title="个人知识库"
         description="你上传的私有资料会被解析、分块并接入三路混合检索，让智能体的回答有出处。"
       />
 
-      <div className="flex items-start gap-2.5 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900">
-        <Info size={16} className="mt-0.5 shrink-0 text-cyan-700" aria-hidden />
+      <div className="ws-card flex items-start gap-2.5 rounded-2xl border-[#ffd85f]/65 bg-[#fff4c8]/70 px-4 py-3 text-sm text-[#5e4e1d]">
+        <Info size={16} className="mt-0.5 shrink-0 text-[#77621d]" aria-hidden />
         <p>
           文档通过 AI 学习导师的资料入口上传并解析，支持 md / pdf / docx 等格式。
-          <Link href="/chat" className="ml-1 font-medium text-cyan-800 underline">
+          <Link href="/chat" className="ml-1 font-medium text-[#5e4e1d] underline underline-offset-4">
             去上传 →
           </Link>
         </p>
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p className="ws-card rounded-2xl border-rose-200/70 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="ws-scroll max-h-[calc(100dvh-260px)] space-y-3 pr-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="ws-skeleton h-16" />
           ))}
@@ -64,13 +64,13 @@ export default function KnowledgePage() {
           description="把课程讲义、笔记或论文上传进来，智能体生成资源时会优先引用你的私有资料。"
         />
       ) : (
-        <div className="space-y-3">
+        <div className="ws-scroll max-h-[calc(100dvh-260px)] space-y-3 pr-1">
           {items.map((item) => (
             <article
               key={item.doc_id}
-              className="ws-card flex items-center gap-4 p-4 transition-shadow hover:shadow-[0_4px_16px_rgb(5_26_36/0.08)]"
+              className="ws-dashboard-card flex items-center gap-4 rounded-3xl p-4 transition duration-200 hover:-translate-y-px hover:bg-white/80"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-800">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#303030] text-white">
                 <FileText size={18} aria-hidden />
               </span>
               <div className="min-w-0 flex-1">

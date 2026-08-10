@@ -38,7 +38,7 @@ export default function PlanPage() {
   }, [load]);
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Learning Path"
         title="学习路径"
@@ -83,7 +83,7 @@ export default function PlanPage() {
       {loading ? (
         <PlanSkeleton />
       ) : (
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.36fr)_minmax(320px,0.74fr)]">
+        <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.36fr)_minmax(320px,0.74fr)]">
           <PlanTimeline
             nodes={today.pathNodes}
             progress={today.progress}

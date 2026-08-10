@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { DragEvent, ReactNode } from "react";
+import { FileUp } from "lucide-react";
 import { apiForm, getErrorMessage } from "@/lib/apiClient";
 import type { IngestResult } from "@/lib/types";
 
@@ -54,7 +55,9 @@ export function KnowledgeUpload({ token }: KnowledgeUploadProps) {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-700">📚 知识库文档上传</h3>
+      <h3 className="flex items-center gap-2 text-sm font-medium text-[#303030]">
+        <FileUp size={15} aria-hidden /> 知识库文档上传
+      </h3>
 
       <div
         onDragOver={(e) => {
@@ -64,10 +67,10 @@ export function KnowledgeUpload({ token }: KnowledgeUploadProps) {
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center text-sm transition ${
+        className={`cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center text-sm transition ${
           dragging
-            ? "border-indigo-400 bg-indigo-50 text-indigo-600"
-            : "border-slate-300 text-slate-500 hover:border-indigo-300"
+            ? "border-[#ffd85f] bg-[#fff4c8]/70 text-[#746016]"
+            : "border-[#898989]/25 bg-white/35 text-[#747474] hover:border-[#303030]/35"
         }`}
       >
         {file ? (
@@ -89,12 +92,12 @@ export function KnowledgeUpload({ token }: KnowledgeUploadProps) {
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
           placeholder="course_id（可选）"
-          className="rounded border border-slate-300 px-2 py-1"
+          className="rounded-xl border border-[#898989]/20 bg-white/70 px-2.5 py-1.5"
         />
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1"
+          className="rounded-xl border border-[#898989]/20 bg-white/70 px-2.5 py-1.5"
         >
           <option value="public">public</option>
           <option value="tenant">tenant</option>
@@ -111,14 +114,14 @@ export function KnowledgeUpload({ token }: KnowledgeUploadProps) {
         <button
           onClick={upload}
           disabled={!file || status === "uploading"}
-          className="ml-auto rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white transition hover:bg-indigo-700 disabled:opacity-40"
+          className="ml-auto rounded-full bg-[#ffd85f] px-4 py-2 font-medium text-[#303030] transition hover:bg-[#ffe38b] disabled:opacity-40"
         >
           {status === "uploading" ? "上传中…" : "上传"}
         </button>
       </div>
 
       {status === "error" && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
           {error}
         </div>
       )}
@@ -131,27 +134,27 @@ export function KnowledgeUpload({ token }: KnowledgeUploadProps) {
 function IngestResultPanel({ result }: { result: IngestResult }) {
   if (result.status === "queued") {
     return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+      <div className="rounded-2xl border border-[#ffd85f]/70 bg-[#fff4c8]/70 p-3 text-sm text-[#746016]">
         已投递异步处理队列（Kafka）· doc_id <code className="text-xs">{result.doc_id}</code>
       </div>
     );
   }
   const stat = (label: string, value: ReactNode) => (
-    <div className="rounded bg-white px-2 py-1.5">
+    <div className="border-l border-[#898989]/20 pl-2">
       <div className="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
       <div className="text-sm font-semibold text-slate-700">{value}</div>
     </div>
   );
   const badge =
     result.status === "ok"
-      ? "bg-emerald-500"
+      ? "bg-[#303030] text-white"
       : result.status === "degraded"
-        ? "bg-amber-500"
-        : "bg-slate-400";
+        ? "bg-[#ffd85f] text-[#303030]"
+        : "bg-[#898989] text-white";
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+    <div className="space-y-2 rounded-2xl border border-[#898989]/15 bg-white/45 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${badge}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${badge}`}>
           {result.status}
         </span>
         <span className="text-sm font-medium text-slate-700">{result.title}</span>

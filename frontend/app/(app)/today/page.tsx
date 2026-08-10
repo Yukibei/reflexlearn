@@ -14,11 +14,6 @@ import { TutorPrompt } from "@/components/today/TutorPrompt";
 import { QuickActions } from "@/components/today/QuickActions";
 import { ProfileSignals, ReviewQueue } from "@/components/today/LearningSignals";
 
-const taskSecondaryActions = [
-  { label: "让 AI 导师解释", href: "/chat", icon: "explain" },
-  { label: "调整学习顺序", href: "/plan", icon: "adjust" },
-] as const;
-
 // 时段问候依赖客户端本地时区，须在 mounted 后计算——否则 SSR(服务端时区) 与
 // 浏览器时区的小时数不一致会触发 hydration mismatch。SSR 渲染稳定的「你好」。
 function greetingPrefix(hour: number | null): string {
@@ -36,6 +31,19 @@ export default function TodayPage() {
   const today = remoteToday ?? fallbackToday;
   const primaryHref = today.mainTask.spaceId ? `/spaces/${today.mainTask.spaceId}` : "/spaces";
   const [hour, setHour] = useState<number | null>(null);
+  const totalMinutes = today.resources.reduce(
+    (sum, resource) => sum + resource.estimatedMinutes,
+    today.mainTask.estimatedMinutes,
+  );
+  const explanationTopic = today.mainTask.pathNode || today.mainTask.title;
+  const taskSecondaryActions = [
+    {
+      label: "让 AI 导师解释",
+      href: `/chat?action=explain&topic=${encodeURIComponent(explanationTopic)}`,
+      icon: "explain",
+    },
+    { label: "调整学习顺序", href: "/plan", icon: "adjust" },
+  ] as const;
 
   useEffect(() => {
     setHour(new Date().getHours());
@@ -60,32 +68,40 @@ export default function TodayPage() {
   }, [auth.access_token]);
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <section className="ws-page gap-4">
       <TodayHero
         greeting={`${greetingPrefix(hour)}，${today.greeting}`}
         learner={auth.user.user_id}
         goal={today.currentGoal}
         summary={`当前主线：${today.mainTask.pathNode || today.mainTask.title}`}
         progress={today.progress}
+        pathCount={today.pathNodes.length}
+        resourceCount={today.resources.length}
+        reviewCount={today.reviewQueue.length}
+        totalMinutes={totalMinutes}
       />
 
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.52fr)_minmax(300px,0.78fr)]">
-        <div className="space-y-8">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[350px_320px]">
+        <div className="min-h-0 md:col-start-1 md:row-start-1 lg:col-start-1 lg:row-start-1">
           <TodayMainTask
             task={today.mainTask}
             primaryHref={primaryHref}
             secondaryActions={taskSecondaryActions}
           />
+        </div>
+        <div className="min-h-0 md:col-start-2 md:row-start-1 lg:col-start-2 lg:row-start-1">
           <LearningPathPreview
             phase={today.mainTask.spaceName || "学习主线"}
             progress={Math.round(today.progress * 100)}
             nodes={today.pathNodes}
             recommendation={today.pathRecommendation}
           />
-          <RecommendedResources resources={today.resources} />
+        </div>
+        <div className="min-h-0 md:col-start-1 md:row-start-2 lg:col-start-3 lg:row-start-1">
+          <QuickActions actions={today.quickActions} />
         </div>
 
-        <aside className="space-y-6">
+        <aside className="flex min-h-0 flex-col gap-3 md:col-span-2 md:row-start-3 md:grid md:grid-cols-2 lg:col-span-1 lg:col-start-4 lg:row-span-2 lg:row-start-1 lg:flex">
           <TutorPrompt
             prompt={{
               message: today.tutorPrompt,
@@ -93,14 +109,19 @@ export default function TodayPage() {
               href: "/chat",
             }}
           />
-          <QuickActions actions={today.quickActions} />
-          <ProfileSignals signals={today.profileSignals} />
           <ReviewQueue items={today.reviewQueue} />
         </aside>
+
+        <div className="min-h-0 md:col-start-2 md:row-start-2 lg:col-start-1 lg:row-start-2">
+          <ProfileSignals signals={today.profileSignals} />
+        </div>
+        <div className="min-h-0 md:col-span-2 md:row-start-4 lg:col-start-2 lg:col-end-4 lg:row-start-2">
+          <RecommendedResources resources={today.resources} />
+        </div>
       </div>
 
       {loadError ? (
-        <p className="text-xs leading-5 text-slate-500" role="status">
+        <p className="ws-dashboard-card px-4 py-3 text-xs leading-5 text-[#747474]" role="status">
           {loadError}
         </p>
       ) : null}

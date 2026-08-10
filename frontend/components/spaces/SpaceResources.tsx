@@ -34,7 +34,7 @@ export function SpaceResources({ resources }: { resources: SpaceResource[] }) {
     <section className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ws-accent)]">
+          <p className="ws-eyebrow">
             Resources
           </p>
           <h2 className="mt-2 text-xl font-medium text-[var(--ws-ink)]">这个目标下的学习资源</h2>
@@ -47,21 +47,21 @@ export function SpaceResources({ resources }: { resources: SpaceResource[] }) {
       </div>
 
       {resources.length === 0 ? (
-        <div className="bg-white px-5 py-6 text-sm leading-6 text-slate-600">
+        <div className="ws-dashboard-card px-5 py-6 text-sm leading-6 text-[#747474]">
           这个空间还没有沉淀资源。完成一次讲解、练习或资料上传后，会在这里形成可回看的资源列表。
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 pr-1">
           {groups.map((group, index) => {
             const Icon = group.meta.icon;
             return (
               <details
                 key={group.type}
                 open={index === 0}
-                className="group border border-[var(--ws-line)] bg-white"
+                className="ws-dashboard-card group overflow-hidden rounded-3xl"
               >
                 <summary className="flex cursor-pointer select-none items-center gap-3 px-4 py-3.5 [&::-webkit-details-marker]:hidden">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#f0eee7] text-[var(--ws-ink)]">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e3e5e6] text-[var(--ws-ink)]">
                     <Icon size={16} aria-hidden />
                   </span>
                   <span className="flex-1 font-medium text-[var(--ws-ink)]">{group.meta.label}</span>

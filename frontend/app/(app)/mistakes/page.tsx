@@ -35,7 +35,7 @@ export default function MistakesPage() {
   const [pathAnchor, setPathAnchor] = useState<number | null>(null);
   const [insertState, setInsertState] = useState<"idle" | "saving" | "saved">("idle");
 
-  async function load() {
+  async function load(): Promise<MistakeItem[]> {
     const data = await apiJson<{ items: MistakeItem[] }>(
       `${API_BASE}/mistakes`,
       auth.access_token,
@@ -45,10 +45,21 @@ export default function MistakesPage() {
       const refreshed = data.items.find((item) => item.mistake_id === selected.mistake_id);
       if (refreshed) setSelected(refreshed);
     }
+    return data.items;
   }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("create") === "1") setFormOpen(true);
     load()
+      .then((loadedItems) => {
+        const topic = params.get("topic")?.trim();
+        if (!topic) return;
+        const requested = loadedItems.find(
+          (item) => item.concept === topic || item.question.includes(topic),
+        );
+        if (requested) selectMistake(requested);
+      })
       .catch((e: unknown) => setError(getErrorMessage(e)))
       .finally(() => setLoading(false));
     // 当前学习路径的进行中节点：补救计划「插入路径」的锚点（无真实路径则不显示入口）
@@ -124,7 +135,7 @@ export default function MistakesPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Mistakes"
         title="错题本"
@@ -148,13 +159,13 @@ export default function MistakesPage() {
       ) : null}
 
       {error ? (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p className="ws-card rounded-2xl border-rose-200/70 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="space-y-3">
+        <div className="ws-scroll max-h-[calc(100dvh-250px)] space-y-3 pr-1">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => <div key={i} className="ws-skeleton h-28" />)
           ) : items.length === 0 ? (
@@ -167,43 +178,40 @@ export default function MistakesPage() {
             items.map((item) => {
               const active = selected?.mistake_id === item.mistake_id;
               return (
-                <button
+                <article
                   key={item.mistake_id}
-                  onClick={() => selectMistake(item)}
-                  className={`ws-card w-full p-4 text-left transition-all hover:shadow-[0_4px_16px_rgb(5_26_36/0.08)] ${
-                    active ? "border-[var(--ws-navy)] ring-1 ring-[var(--ws-navy)]" : ""
+                  className={`ws-card w-full cursor-pointer p-4 text-left transition-all hover:-translate-y-px hover:bg-white/80 ${
+                    active ? "border-[#ffd85f] ring-1 ring-[#ffd85f]" : ""
                   }`}
                 >
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {item.concept ? <Tag tone="navy">{item.concept}</Tag> : null}
-                    {item.status === "reviewed" ? (
-                      <Tag tone="success">已复习</Tag>
-                    ) : (
-                      <Tag tone="warning">待复习</Tag>
-                    )}
-                  </div>
-                  <p className="mt-2 line-clamp-2 font-medium text-[var(--ws-ink)]">
-                    {item.question}
-                  </p>
-                  <p className="mt-1 line-clamp-1 text-sm text-slate-500">{item.answer}</p>
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void reviewMistake(item.mistake_id);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.stopPropagation();
-                        void reviewMistake(item.mistake_id);
-                      }
-                    }}
-                    className="mt-2.5 inline-block text-xs text-[var(--ws-accent)] hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => selectMistake(item)}
+                    className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#303030]/25"
+                  >
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      {item.concept ? <Tag tone="navy">{item.concept}</Tag> : null}
+                      {item.status === "reviewed" ? (
+                        <Tag tone="success">已复习</Tag>
+                      ) : (
+                        <Tag tone="warning">待复习</Tag>
+                      )}
+                    </span>
+                    <span className="mt-2 block line-clamp-2 font-medium text-[var(--ws-ink)]">
+                      {item.question}
+                    </span>
+                    <span className="mt-1 block line-clamp-1 text-sm text-slate-500">
+                      {item.answer}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void reviewMistake(item.mistake_id)}
+                    className="mt-2.5 text-xs text-[var(--ws-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#303030]/25"
                   >
                     快速归因 →
-                  </span>
-                </button>
+                  </button>
+                </article>
               );
             })
           )}

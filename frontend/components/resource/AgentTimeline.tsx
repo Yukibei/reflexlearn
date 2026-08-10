@@ -1,4 +1,5 @@
 import type { AgentStep } from "@/lib/types";
+import { ThinkingReasoning } from "@/components/chat/ThinkingReasoning";
 
 const STEP_LABEL: Record<string, string> = {
   session_start: "会话开始",
@@ -14,42 +15,17 @@ const STEP_LABEL: Record<string, string> = {
 export function AgentTimeline({
   steps,
   streaming,
+  durationMs,
 }: {
   steps: AgentStep[];
   streaming: boolean;
+  durationMs: number | null;
 }) {
-  if (steps.length === 0 && !streaming) return null;
+  const items = steps.map((step) => {
+    const label = STEP_LABEL[step.step] || step.step;
+    const detail = step.detail || step.message;
+    return detail ? `${label}：${detail}` : label;
+  });
 
-  return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Agent 协作过程
-      </h2>
-      <ol className="space-y-2">
-        {steps.map((s, i) => (
-          <li key={i} className="flex items-start gap-3 text-sm">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-700">
-              {i + 1}
-            </span>
-            <div className="leading-5">
-              <span className="font-medium text-slate-800">
-                {STEP_LABEL[s.step] || s.step}
-              </span>
-              {(s.detail || s.message) && (
-                <span className="ml-2 text-slate-500">{s.detail || s.message}</span>
-              )}
-            </div>
-          </li>
-        ))}
-        {streaming && (
-          <li className="flex items-center gap-3 text-sm text-slate-400">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-              <span className="h-2 w-2 animate-ping rounded-full bg-indigo-400" />
-            </span>
-            处理中…
-          </li>
-        )}
-      </ol>
-    </section>
-  );
+  return <ThinkingReasoning items={items} active={streaming} durationMs={durationMs} />;
 }

@@ -108,7 +108,7 @@ export default function GrowthPage() {
   const latestPath = latest?.file_path ?? exports[0]?.file_path;
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Growth"
         title="成长档案"
@@ -221,6 +221,7 @@ function TechnicalEvidence({
             icon={Sprout}
             title="暂无协作轨迹"
             description="完成一次 AI 导师对话后，画像、规划、生成、批判等节点会形成可追溯记录。"
+            framed={false}
           />
         ) : (
           <ol className="ml-2 border-l border-[var(--ws-line-strong)]">

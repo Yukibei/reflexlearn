@@ -64,8 +64,8 @@ export function ResourceStudyActions({
               aria-pressed={active}
               className={`inline-flex items-center gap-1.5 border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60 ${
                 active
-                  ? "border-[var(--ws-navy)] bg-[var(--ws-navy)] text-white"
-                  : "border-[var(--ws-line-strong)] bg-white text-slate-600 hover:border-[var(--ws-navy)] hover:text-[var(--ws-ink)]"
+                  ? "rounded-full border-[#303030] bg-[#303030] text-white"
+                  : "rounded-full border-[#898989]/20 bg-white/65 text-[#747474] hover:bg-white hover:text-[#303030]"
               }`}
             >
               <Icon size={14} aria-hidden />

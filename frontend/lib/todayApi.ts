@@ -56,12 +56,18 @@ function mapQuickAction(action: TodayProfileSignal, index: number): TodayQuickAc
     practice: "围绕当前薄弱点出题",
     goal: "开启一条新的学习主线",
   };
+  const hrefByIcon: Record<TodayQuickActionView["icon"], string> = {
+    upload: "/knowledge",
+    mistake: "/mistakes?create=1",
+    practice: "/chat?action=practice",
+    goal: "/spaces?create=1",
+  };
   const icon = iconByHref[action.value] ?? "goal";
   return {
     id: `${icon}-${index}`,
     label: action.label,
     description: descriptionByIcon[icon],
-    href: action.value || "/spaces",
+    href: hrefByIcon[icon],
     icon,
   };
 }

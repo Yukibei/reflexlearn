@@ -10,7 +10,7 @@ interface ResourceListProps {
 
 export function ResourceList({ resources }: ResourceListProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="ws-scroll grid max-h-[620px] gap-3 pr-1 md:grid-cols-2">
       {resources.map((item) => (
         <ResourceCard key={item.resource_id} item={item} />
       ))}
@@ -24,7 +24,7 @@ function ResourceCard({ item }: { item: LearningResource }) {
   const source = item.source_label || view.label;
 
   return (
-    <article className="bg-white p-5 shadow-[0_18px_50px_rgb(5_26_36/0.05)]">
+    <article className="ws-dashboard-card rounded-3xl p-5 transition hover:bg-white/80">
       <div className="flex items-start gap-4">
         <span className={`flex h-10 w-10 shrink-0 items-center justify-center ${view.tone}`}>
           <Icon size={18} aria-hidden />

@@ -59,7 +59,7 @@ export function MistakeDetail({
   const reviewed = item.status === "reviewed";
 
   return (
-    <article className="ws-card space-y-5 p-5">
+    <article className="ws-card ws-scroll max-h-[calc(100dvh-250px)] space-y-5 p-5">
       <header>
         <div className="flex flex-wrap items-center gap-1.5">
           {item.concept ? <Tag tone="navy">{item.concept}</Tag> : null}
@@ -72,13 +72,13 @@ export function MistakeDetail({
         <h2 className="mt-2.5 text-lg font-medium leading-relaxed text-[var(--ws-ink)]">
           {item.question}
         </h2>
-        <dl className="mt-3 space-y-2 text-sm">
-          <div className="rounded-lg bg-rose-50/60 px-3 py-2">
-            <dt className="text-xs text-rose-600">你的答案</dt>
+        <dl className="mt-4 divide-y divide-[#898989]/15 border-y border-[#898989]/15 text-sm">
+          <div className="grid gap-1 py-3 sm:grid-cols-[88px_1fr]">
+            <dt className="text-xs text-[#898989]">你的答案</dt>
             <dd className="mt-0.5 text-slate-700">{item.answer}</dd>
           </div>
-          <div className="rounded-lg bg-emerald-50/60 px-3 py-2">
-            <dt className="text-xs text-emerald-700">参考要点</dt>
+          <div className="grid gap-1 py-3 sm:grid-cols-[88px_1fr]">
+            <dt className="text-xs text-[#746016]">参考要点</dt>
             <dd className="mt-0.5 text-slate-700">{item.expected}</dd>
           </div>
         </dl>
@@ -106,7 +106,7 @@ export function MistakeDetail({
       ) : null}
 
       {reflection ? (
-        <section className="rounded-xl border border-[var(--ws-line)] bg-[var(--ws-paper)] p-4">
+        <section className="border-t border-[#898989]/15 pt-4">
           <div className="flex items-center gap-2">
             <h3 className="ws-eyebrow">归因结果</h3>
             <Tag tone="danger">{reflection.category}</Tag>
@@ -119,7 +119,7 @@ export function MistakeDetail({
       ) : null}
 
       {plan ? (
-        <section className="rounded-xl border border-[var(--ws-line)] bg-[var(--ws-paper)] p-4">
+        <section className="border-t border-[#898989]/15 pt-4">
           <h3 className="ws-eyebrow">补救计划</h3>
           <ol className="mt-2.5 space-y-2.5">
             {plan.steps.map((step, index) => (
@@ -166,7 +166,7 @@ export function MistakeDetail({
             return (
               <div
                 key={res.resource_id}
-                className="rounded-xl border border-[var(--ws-line)] p-4"
+                className="border-t border-[#898989]/15 py-4"
               >
                 <div className="flex items-center gap-2.5">
                   <span
@@ -177,7 +177,7 @@ export function MistakeDetail({
                   <span className="font-medium text-[var(--ws-ink)]">{res.title}</span>
                   <Tag tone="neutral">{meta.label}</Tag>
                 </div>
-                <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-[rgb(5_26_36/0.04)] p-3 text-xs leading-relaxed text-slate-700">
+                <pre className="ws-scroll mt-3 max-h-64 whitespace-pre-wrap rounded-2xl bg-white/55 p-3 text-xs leading-relaxed text-slate-700">
                   {res.content}
                 </pre>
               </div>

@@ -1,40 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowUp, Square } from "lucide-react";
 
 export function ChatInput({
   disabled,
   onSend,
+  onStop,
 }: {
   disabled: boolean;
   onSend: (msg: string) => void;
+  onStop?: () => void;
 }) {
   const [value, setValue] = useState("");
 
-  const submit = () => {
-    const v = value.trim();
-    if (!v || disabled) return;
-    onSend(v);
-  };
+  function submit(): void {
+    const message = value.trim();
+    if (!message || disabled) return;
+    onSend(message);
+    setValue("");
+  }
 
   return (
-    <div className="flex gap-2">
-      <input
-        className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
-        placeholder="输入学习目标，例如：机器学习从入门到精通的系统学习路径"
+    <div className="flex items-end gap-2 rounded-xl border border-[#898989]/18 bg-white/72 p-1.5 shadow-[0_1px_3px_rgb(48_48_48/0.04),inset_0_1px_0_rgb(255_255_255/0.76)]">
+      <textarea
+        rows={1}
+        className="max-h-28 min-h-9 flex-1 resize-none bg-transparent px-2.5 py-1.5 text-[13px] leading-6 text-[#303030] outline-none placeholder:text-[#898989] disabled:cursor-not-allowed"
+        placeholder="描述你的学习目标，或继续追问当前问题..."
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") submit();
+        onChange={(event) => setValue(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            submit();
+          }
         }}
         disabled={disabled}
       />
       <button
-        className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-        onClick={submit}
-        disabled={disabled}
+        type="button"
+        onClick={disabled ? onStop : submit}
+        disabled={disabled ? !onStop : !value.trim()}
+        aria-label={disabled ? "停止生成" : "发送消息"}
+        title={disabled ? "停止生成" : "发送消息"}
+        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-35 ${disabled ? "bg-[#77621d] hover:bg-[#8b7424]" : "bg-[#303030] hover:bg-[#4a4a4a]"}`}
       >
-        {disabled ? "生成中…" : "开始"}
+        {disabled ? <Square size={11} fill="currentColor" aria-hidden /> : <ArrowUp size={17} aria-hidden />}
       </button>
     </div>
   );

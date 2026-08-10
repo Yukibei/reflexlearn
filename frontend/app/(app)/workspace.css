@@ -1,40 +1,163 @@
-/* 工作台主题「暖白纸张 × 海军蓝」——与登录页品牌墙 / 首页白色内容面板同源。
-   约束：变量全部挂 .ws-root（不污染 (public) 与 /design 的暗色玻璃体系）；
-   纯 CSS 不用 @apply（独立文件无 @reference 上下文）；覆盖 globals.css 的
-   暗色样式一律靠 .ws-root 后代选择器特异性取胜，绝不修改 globals.css。 */
-
 .ws-root {
-  --ws-navy: hsl(201 100% 13%); /* 主行动色，与登录按钮一致 */
-  --ws-ink: #051a24; /* 标题/正文墨蓝，与 LandingContent 一致 */
-  --ws-paper: #f7f5f0; /* 页面底，与登录页右栏一致 */
-  --ws-card: #ffffff;
-  --ws-line: #e7e3da; /* 卡片暖发丝描边 */
-  --ws-line-strong: #d8d2c4; /* 分隔线 / hover 描边 */
-  --ws-accent: #0e7490; /* cyan-700：链接、eyebrow */
+  --ws-navy: #303030;
+  --ws-ink: #303030;
+  --ws-paper: #e3e5e6;
+  --ws-card: rgb(255 255 255 / 0.62);
+  --ws-line: rgb(137 137 137 / 0.18);
+  --ws-line-strong: rgb(137 137 137 / 0.32);
+  --ws-accent: #77621d;
+  --ws-yellow: #ffd85f;
+  --ws-muted: #747474;
   background: var(--ws-paper);
   color: var(--ws-ink);
-  font-family: var(--font-body);
+  font-family: "Sofia Pro Regular", var(--font-body), sans-serif;
+  isolation: isolate;
+  position: relative;
+}
+
+.ws-root,
+.ws-root * {
+  font-family: "Sofia Pro Regular", var(--font-body), sans-serif;
+}
+
+.ws-root button,
+.ws-root input,
+.ws-root textarea,
+.ws-root select {
+  font: inherit;
+}
+
+.ws-background {
+  height: 100dvh;
+  inset: 0;
+  position: fixed;
+  width: 100%;
+  z-index: -1;
 }
 
 .ws-serif {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-family: "Sofia Pro Regular", var(--font-body), sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .ws-card {
   background: var(--ws-card);
   border: 1px solid var(--ws-line);
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgb(5 26 36 / 0.04);
+  border-radius: 24px;
+  box-shadow: 0 2px 20px rgb(48 48 48 / 0.06), inset 0 1px 0 rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+}
+
+.ws-dashboard-card {
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid rgb(255 255 255 / 0.48);
+  border-radius: 24px;
+  box-shadow: 0 2px 20px rgb(48 48 48 / 0.06), inset 0 1px 0 rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+}
+
+.ws-nav-surface {
+  background: rgb(255 255 255 / 0.58);
+  border: 1px solid rgb(137 137 137 / 0.16);
+  box-shadow: 0 2px 16px rgb(48 48 48 / 0.05), inset 0 1px 0 rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
 .ws-eyebrow {
   font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--ws-accent);
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--ws-muted);
+}
+
+.ws-page {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ws-scroll {
+  overflow: auto;
+  overscroll-behavior: auto;
+  scrollbar-color: rgb(48 48 48 / 0.2) transparent;
+  scrollbar-width: thin;
+}
+
+.ws-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.ws-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ws-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(48 48 48 / 0.18);
+}
+
+.ws-chat-scroll {
+  overscroll-behavior-y: contain;
+  scrollbar-color: rgb(48 48 48 / 0.18) transparent;
+  scrollbar-width: thin;
+}
+
+.ws-chat-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ws-chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ws-chat-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(48 48 48 / 0.16);
+}
+
+.ws-chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(48 48 48 / 0.28);
+}
+
+.ws-route-progress {
+  background: var(--ws-yellow);
+  box-shadow: 0 0 12px rgb(255 216 95 / 0.75);
+  height: 3px;
+  left: 0;
+  position: fixed;
+  top: 0;
+  transition: width 180ms ease, opacity 180ms ease;
+  z-index: 100;
+}
+
+.ws-icon-button {
+  display: inline-flex;
+  height: 40px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(137 137 137 / 0.2);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.66);
+  color: var(--ws-ink);
+  box-shadow: 0 2px 12px rgb(48 48 48 / 0.05), inset 0 1px 0 rgb(255 255 255 / 0.72);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.ws-icon-button:hover {
+  background: rgb(255 255 255 / 0.9);
+  transform: translateY(-1px);
+}
+
+.ws-icon-button:active {
+  transform: scale(0.96);
 }
 
 @keyframes ws-shimmer {
@@ -56,8 +179,8 @@
 
 /* globals 的 ::selection 是「白字」，在暖白底会不可读 */
 .ws-root ::selection {
-  background: rgb(125 211 252 / 0.4);
-  color: #051a24;
+  background: rgb(255 216 95 / 0.72);
+  color: #303030;
 }
 
 /* globals 的 .markdown 是暗色调（浅灰字/白标题），在暖白工作台内整组翻亮。
@@ -90,9 +213,6 @@
   background: rgb(5 26 36 / 0.04);
 }
 
-/* —— 印刷档案（/profile）：入场、印章、刻度 —— */
-
-/* 卡片入场：一次性编排，delay 由使用处 inline style 给 */
 @keyframes ws-rise {
   from {
     opacity: 0;
@@ -107,25 +227,21 @@
   animation: ws-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* 印章式标签：双线框 + 微倾斜，hover 回正（数据来源的「盖章」隐喻） */
 .ws-stamp {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
-  outline: 1px solid currentColor;
-  outline-offset: 2.5px;
+  padding: 5px 11px;
+  border: 1px solid rgb(137 137 137 / 0.2);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.58);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  transform: rotate(-2.5deg);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: background-color 180ms ease;
 }
 .ws-stamp:hover {
-  transform: rotate(0deg);
+  background: rgb(255 255 255 / 0.88);
 }
 
 /* 掌握度刻度轨道：填充之上用卡片底色细线每 10% 切一刀，印刷尺质感 */

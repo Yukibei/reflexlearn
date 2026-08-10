@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, FolderOpen } from "lucide-react";
 
 import { SpaceHero } from "@/components/spaces/SpaceHero";
@@ -11,7 +12,7 @@ import { SpaceResources } from "@/components/spaces/SpaceResources";
 import { EmptyState } from "@/components/workspace";
 import { getErrorMessage } from "@/lib/apiClient";
 import { useAuthSession } from "@/lib/authContext";
-import { getSpaceDetail } from "@/lib/spacesApi";
+import { deleteSpace, getSpaceDetail, updateSpace } from "@/lib/spacesApi";
 import type { SpaceDetail } from "@/lib/types";
 
 export default function SpaceDetailPage({
@@ -21,6 +22,7 @@ export default function SpaceDetailPage({
 }) {
   const { id } = use(params);
   const { auth } = useAuthSession();
+  const router = useRouter();
   const [detail, setDetail] = useState<SpaceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -46,7 +48,7 @@ export default function SpaceDetailPage({
 
   if (loading) {
     return (
-      <section className="space-y-8">
+      <section className="ws-page">
         <div className="ws-skeleton h-40" />
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="ws-skeleton h-96" />
@@ -58,7 +60,7 @@ export default function SpaceDetailPage({
 
   if (error || !detail) {
     return (
-      <section className="space-y-6">
+      <section className="ws-page">
         <Link
           href="/today"
           className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[var(--ws-ink)]"
@@ -74,9 +76,20 @@ export default function SpaceDetailPage({
     );
   }
 
+  const renameGoal = async (title: string) => {
+    const updated = await updateSpace(auth.access_token, id, { title, course: detail.course });
+    setDetail(updated);
+  };
+
+  const removeGoal = async () => {
+    await deleteSpace(auth.access_token, id);
+    router.push("/spaces");
+    router.refresh();
+  };
+
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-      <SpaceHero detail={detail} />
+    <section className="ws-page">
+      <SpaceHero detail={detail} onRename={renameGoal} onDelete={removeGoal} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <SpacePath steps={detail.steps} />

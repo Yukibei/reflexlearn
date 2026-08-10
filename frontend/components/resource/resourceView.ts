@@ -22,44 +22,44 @@ const RESOURCE_VIEW: Record<string, ResourceView> = {
     label: "外部视频",
     action: "观看",
     icon: PlaySquare,
-    tone: "bg-rose-50 text-rose-700",
+    tone: "rounded-xl bg-[#303030] text-white",
   },
   official_doc: {
     label: "官方资料",
     action: "打开来源",
     icon: BookOpenText,
-    tone: "bg-emerald-50 text-emerald-700",
+    tone: "rounded-xl bg-[#303030]/[0.07] text-[#303030]",
   },
   oer: {
     label: "开放课程",
     action: "打开课程",
     icon: BookOpenText,
-    tone: "bg-indigo-50 text-indigo-700",
+    tone: "rounded-xl bg-[#e3e5e6] text-[#303030]",
   },
   ai_document: {
     label: "AI 讲解文档",
     action: "阅读",
     icon: FileText,
-    tone: "bg-cyan-50 text-cyan-700",
+    tone: "rounded-xl bg-white/75 text-[#303030]",
   },
   quiz: {
     label: "针对练习",
     action: "开始练习",
     icon: ClipboardCheck,
-    tone: "bg-amber-50 text-amber-700",
+    tone: "rounded-xl bg-[#ffd85f] text-[#303030]",
   },
   user_upload: {
     label: "个人资料",
     action: "查看资料",
     icon: UploadCloud,
-    tone: "bg-slate-100 text-slate-700",
+    tone: "rounded-xl bg-[#e3e5e6] text-[#303030]",
   },
-  code: { label: "代码案例", action: "查看", icon: Code2, tone: "bg-violet-50 text-violet-700" },
-  reading: { label: "阅读材料", action: "阅读", icon: BookOpenText, tone: "bg-indigo-50 text-indigo-700" },
-  doc: { label: "讲解文档", action: "阅读", icon: FileText, tone: "bg-cyan-50 text-cyan-700" },
-  video: { label: "视频资源", action: "观看", icon: PlaySquare, tone: "bg-rose-50 text-rose-700" },
-  mindmap: { label: "思维导图", action: "查看", icon: Network, tone: "bg-emerald-50 text-emerald-700" },
-  debate: { label: "观点辨析", action: "查看", icon: MessagesSquare, tone: "bg-amber-50 text-amber-700" },
+  code: { label: "代码案例", action: "查看", icon: Code2, tone: "rounded-xl bg-[#303030] text-white" },
+  reading: { label: "阅读材料", action: "阅读", icon: BookOpenText, tone: "rounded-xl bg-[#e3e5e6] text-[#303030]" },
+  doc: { label: "讲解文档", action: "阅读", icon: FileText, tone: "rounded-xl bg-white/75 text-[#303030]" },
+  video: { label: "视频资源", action: "观看", icon: PlaySquare, tone: "rounded-xl bg-[#303030] text-white" },
+  mindmap: { label: "思维导图", action: "查看", icon: Network, tone: "rounded-xl bg-[#303030]/[0.07] text-[#303030]" },
+  debate: { label: "观点辨析", action: "查看", icon: MessagesSquare, tone: "rounded-xl bg-[#ffd85f] text-[#303030]" },
 };
 
 export function viewForResource(type: string): ResourceView {
@@ -68,7 +68,7 @@ export function viewForResource(type: string): ResourceView {
       label: "学习资源",
       action: "查看",
       icon: FileText,
-      tone: "bg-slate-100 text-slate-700",
+      tone: "rounded-xl bg-white/70 text-[#747474]",
     }
   );
 }

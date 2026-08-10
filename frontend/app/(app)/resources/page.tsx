@@ -97,7 +97,7 @@ export default function ResourcesPage() {
   );
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <section className="ws-page">
       <PageHeader
         eyebrow="Resources"
         title="学习资源库"
@@ -106,10 +106,10 @@ export default function ResourcesPage() {
 
       <ResourceDiscovery profile={profile} today={today} resources={items} />
 
-      {error ? <p className="bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
+      {error ? <p className="ws-card rounded-2xl border-rose-200/70 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
 
       {types.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="ws-scroll flex gap-2 pb-1">
           <FilterButton
             active={filter === null}
             label={`全部 ${items.length}`}
@@ -177,10 +177,10 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`px-3.5 py-1.5 text-xs font-medium transition-colors ${
+      className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
         active
-          ? "bg-[var(--ws-ink)] text-white"
-          : "border border-[var(--ws-line-strong)] bg-white text-slate-600 hover:border-[var(--ws-navy)]"
+          ? "bg-[#303030] text-white"
+          : "border border-[#898989]/20 bg-white/60 text-[#747474] hover:bg-white"
       }`}
     >
       {label}

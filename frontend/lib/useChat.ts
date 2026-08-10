@@ -19,11 +19,14 @@ export interface Turn {
   id: number;
   userMessage: string;
   status: ChatStatus;
+  startedAt: number;
+  durationMs: number | null;
   steps: AgentStep[];
   cards: Map<string, ResourceCard>;
   debateRounds: DebateRound[];
   verdict: JudgeVerdict | null;
   path: LearningPath | null;
+  assistantMessage: string;
   error: string | null;
 }
 
@@ -35,6 +38,7 @@ type Action =
   | { type: "debate_round"; payload: DebateRound }
   | { type: "judge_verdict"; payload: JudgeVerdict }
   | { type: "learning_path"; payload: LearningPath }
+  | { type: "assistant_message"; payload: string }
   | { type: "done" }
   | { type: "error"; payload: string }
   | { type: "reset" };
@@ -44,11 +48,14 @@ function newTurn(id: number, message: string, displayMessage?: string): Turn {
     id,
     userMessage: displayMessage || message,
     status: "streaming",
+    startedAt: Date.now(),
+    durationMs: null,
     steps: [],
     cards: new Map(),
     debateRounds: [],
     verdict: null,
     path: null,
+    assistantMessage: "",
     error: null,
   };
 }
@@ -99,10 +106,21 @@ function reducer(turns: Turn[], action: Action): Turn[] {
       return updateLast(turns, (t) => ({ ...t, verdict: action.payload }));
     case "learning_path":
       return updateLast(turns, (t) => ({ ...t, path: action.payload }));
+    case "assistant_message":
+      return updateLast(turns, (t) => ({ ...t, assistantMessage: action.payload }));
     case "done":
-      return updateLast(turns, (t) => (t.status === "error" ? t : { ...t, status: "done" }));
+      return updateLast(turns, (t) =>
+        t.status === "streaming"
+          ? { ...t, status: "done", durationMs: Date.now() - t.startedAt }
+          : t,
+      );
     case "error":
-      return updateLast(turns, (t) => ({ ...t, status: "error", error: action.payload }));
+      return updateLast(turns, (t) => ({
+        ...t,
+        status: "error",
+        error: action.payload,
+        durationMs: Date.now() - t.startedAt,
+      }));
     case "reset":
       return [];
     default:
@@ -197,6 +215,11 @@ export function useChat(token: string) {
           case "learning_path":
             dispatch({ type: "learning_path", payload: msg.data as LearningPath });
             break;
+          case "assistant_message": {
+            const data = asRecord(msg.data);
+            dispatch({ type: "assistant_message", payload: asString(data.content) });
+            break;
+          }
           case "error": {
             const data = asRecord(msg.data);
             errored = true;
