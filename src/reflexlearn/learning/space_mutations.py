@@ -91,7 +91,16 @@ async def _delete_goal_relations(conn, goal_id: int) -> None:
         """
         DELETE FROM path_items
         WHERE path_id IN (SELECT id FROM learning_paths WHERE goal_id=$1)
-           OR resource_id IN (SELECT id FROM resources WHERE goal_id=$1)
+        """,
+        goal_id,
+    )
+    # 资源固定只校验所有权、不限制同一目标，因此别的目标路径上可能固定着本目标的资源。
+    # 那些节点属于另一条学习路径，只能解绑，不能随本目标一起删掉；解绑也必须早于
+    # 删除 resources，否则外键引用悬空。
+    await conn.execute(
+        """
+        UPDATE path_items SET resource_id=NULL
+        WHERE resource_id IN (SELECT id FROM resources WHERE goal_id=$1)
         """,
         goal_id,
     )

@@ -6,6 +6,7 @@ from reflexlearn.api.app import create_app
 from reflexlearn.common.auth import CurrentUser, issue_token
 from reflexlearn.common.config import Settings
 from reflexlearn.learning.assets import LearningAssetStore
+from reflexlearn.learning.spaces import reset_space_store_for_tests
 
 
 def _headers(user_id: str, tenant_id: str = "default") -> dict[str, str]:
@@ -78,20 +79,26 @@ def _client_with_memory(monkeypatch):
     )
     monkeypatch.setattr(db, "get_pg_pool", _no_pg)
     route.set_asset_store_for_tests(store)
+    reset_space_store_for_tests()
     return TestClient(create_app())
 
 
 def test_workspace_lists_filter_by_current_user(monkeypatch):
     client = _client_with_memory(monkeypatch)
+    # /api/spaces 列表与创建、详情共用 SpaceStore（单一事实源），
+    # 因此这里用真实创建接口种数据，而不是往只读的 asset store 里塞。
+    client.post("/api/spaces", json={"title": "线性回归空间"}, headers=_headers("u1"))
+    client.post("/api/spaces", json={"title": "他人空间"}, headers=_headers("u2"))
 
     spaces = client.get("/api/spaces", headers=_headers("u1")).json()
     resources = client.get("/api/resources", headers=_headers("u1")).json()
     docs = client.get("/api/knowledge/documents", headers=_headers("u1")).json()
 
-    assert [item["space_id"] for item in spaces["items"]] == ["s1"]
+    assert [item["title"] for item in spaces["items"]] == ["线性回归空间"]
     assert [item["resource_id"] for item in resources["items"]] == ["r1"]
     assert [item["doc_id"] for item in docs["items"]] == ["d1", "d3"]
     route.reset_asset_store_for_tests()
+    reset_space_store_for_tests()
 
 
 def test_workspace_detail_cross_user_returns_403(monkeypatch):
