@@ -4,7 +4,7 @@
 > 标注「做到哪、改了什么、下一步做什么」。**每完成一轮开发，更新第 5 节（追加本轮）+ 第 6 节（勾掉已完成）+ 第 2.3 节（服务状态）。**
 > single source of truth 是 `docs/00-项目蓝图与里程碑.md`，本文件是它的「执行态快照」。
 
-最后更新：2026-06-15 · 本轮成果：**PERF-D（启动后台预热 bge 模型）**——新增 `rag/warmup.py`，app lifespan 启动 `asyncio.ensure_future` 后台预热 embedding 再 reranker（串行不并发两个 bge、各丢线程、复用 `is_available()` 吞异常），门控 `enable_model_warmup`(默认 True)∧`enable_rag`，全程降级不崩启动，消除首请求 10–30s 懒加载。warmup +5 测试 + `with TestClient` 活体验证后台触发，**全量 605 passed**。**性能线 PERF-A 流式/fan-out 并行/PERF-B cheap 路由半/PERF-C 连接池+后台化/PERF-D 预热 全部落地**；统一诚实边界：端到端 TTFC·total 实降待真实可用中转站活体采集（relay 502），剩 PERF-B 前半 merge profile+planner。上一轮：PERF-C 连接池 + PERSIST 后台化。
+最后更新：2026-08-11 · 本轮成果：**Claude 接管：审查纠偏 + 工作区基线提交 + 端口收口**——纠正交接文档「3002/8000 有监听即服务在跑」的误判（实为 medical-ppt-agent 与个人作品集站占用，本项目全栈当时未运行）；95 改 + 42 新增文件按 6 个功能域分批提交，建立可回退基线；应用端口迁 28000/23002，`_lib.sh` 新增 `env_port` 让 `.env` 成为端口单一事实源（13 个脚本不再各自硬编码）。全栈活体跑通：4 容器 + API + 前端 + 登录 cookie 链路 + 问候分流 + 目标 CRUD 全闭环 + 10 路由 200。**遗留高危**：删除学习目标的级联 SQL 会误删其他目标路径中引用了本目标资源的节点（详见 FS-16）。上一轮：PERF-D 启动后台预热 bge 模型，性能线 PERF-A/B/C/D 全部落地。
 
 ---
 
@@ -60,7 +60,7 @@ bash scripts/run_real_eval.sh --tags ablation,rag_required \
 
 # —— 启动后端（后台工作态，:8000）——
 bash scripts/start_api.sh
-# 健康检查：curl -s --noproxy '*' -w "%{http_code}" http://127.0.0.1:8000/docs
+# 健康检查：curl -s --noproxy '*' -w "%{http_code}" http://127.0.0.1:28000/docs
 
 # —— 启动前端（frontend/）——
 bash scripts/start_frontend.sh
@@ -81,12 +81,18 @@ bash scripts/stop_api.sh         # 停止 API；默认 :8000，可 bash scripts/
 
 # —— SSE 联调（中文 body 必须走文件）——
 # 先写 body.json: {"message":"线性回归从入门到精通","user_id":"demo"}
-curl -N -s --noproxy '*' -X POST http://127.0.0.1:8000/api/chat \
+curl -N -s --noproxy '*' -X POST http://127.0.0.1:28000/api/chat \
   -H "Content-Type: application/json" --data-binary @body.json
 ```
 
 ### 2.3 当前服务状态（跨会话会失效，用上方命令重启）
 
+- **2026-08-11 当前态（FS-16）**：中间件 4 容器已起并 healthy（PG 25432 / Redis 26379 /
+  Qdrant 26333 / Neo4j 27687），API `:28000`、前端 `:23002` 均在运行且经同源代理连通。
+  **应用与中间件端口已整体迁到 2xxxx 段**，本节下方历史条目里的 `1xxxx` / `8000` / `3000` /
+  `3001` 端口号均已过时，一律以 `.env` 为准。本机同时运行 docpilot、new-api、medical-ppt、
+  个人作品集站等项目，**判断本项目是否可用要看 `/api/health` 返回的 service 名与 `docker ps`
+  里的 `multagent-*` 容器，而不是端口是否被监听**（交接时正是在这里误判过）。
 - **W2-H 元认知评测链路**：本轮执行 `bash scripts/check_metacognition_perf.sh` 通过；最新验收轮 `metacognition_real_on latency_ms=38982`，trace 包含 `metacognition`，`self_refine_count=1`，Judge reasoning 为 LLM 评语且未出现 `rule:` 规则降级。该脚本依赖已配置的 OpenAI-compatible 中转站，网络抖动会影响耗时，但脚本会按 45s 阈值失败而不粉饰。
 - **W2-G LoRA 样本导出**：新增 `scripts/check_lora_export.sh`，通过 API 触发一次对话轨迹、导出 `logs/lora_samples/*.jsonl` 与 `lora_samples_latest.jsonl`，并校验 JSONL 无明文 `user_id/token/Bearer`。该能力只是训练数据 MVP，不代表已经训练 LoRA 或证明微调收益。
 - **波次 2 活体**：本轮执行 `bash scripts/check_wave2_live.sh` 通过：真实 Qdrant `experience_memory` 过期低命中点写入后被 `forget_stale` 删除（`deleted=1`），真实 Neo4j 图谱自生长写入成功（`status=ok concepts=2 relations=1 count=1`），直接 MERGE 活体也通过。该脚本依赖 Graph 服务可用，后续可用 `bash scripts/start_graph.sh && bash scripts/init_all.sh && bash scripts/check_wave2_live.sh` 复跑。
@@ -126,6 +132,40 @@ curl -N -s --noproxy '*' -X POST http://127.0.0.1:8000/api/chat \
 ---
 
 ## 5. 已完成轮次（倒序，含改动文件清单）
+
+### FS-16 ✅ · Claude 接管：审查纠偏 + 工作区基线提交 + 端口收口（Claude 全栈轮）
+
+**接管审查纠偏**：交接文档 `docs/25` §6.2 判定「3002 和 8000 有监听」，实为误判——`:8000` 上跑的是
+**medical-ppt-agent**（`/api/health` 返回其 service 名），`:3002` 是一个个人作品集站；本项目的 API、
+前端与四个中间件容器**均未运行**。前端 rewrites 默认指向 8000，照此启动会把 `/api/*` 打到别人后端，
+任何「页面 200」都不作数。本机并存 docpilot(15432/16379/16333/19000)、new-api(3000)、
+medical-ppt(8000/9000/6379/55432)、portfolio(3002) 四套项目，`1xxxx` 段与 8000/3002 全被占用。
+
+**工作区基线提交**（95 改 + 42 新增，按功能域拆 6 个提交，原样固化接手时状态）：
+`a6005f0` 中间件端口迁移与代理适配 → `b2a1575` 目标 CRUD + 问候意图 → `22a301f` 工作台重构 →
+`70b1061` 落地页 → `1adfeef` 生产部署（标注未做生产验收）→ `9745863` 文档（标注其中错误结论待更正）。
+
+**端口收口**（`ddf7711`）：API 迁 28000、前端迁 23002，与已迁的中间件同处 2xxxx 段；`_lib.sh` 新增
+`env_port`——端口只在 `.env` 定义一次，13 个脚本不再各自硬编码，取值链为「位置参数 > 环境变量 >
+.env > 兜底默认」；同步 next.config、CORS、prometheus、test_chat_utf8.ps1、README、docs/09、docs/25。
+顺带修好 `test_core.py` 中**早已失效**的断言：脚本默认端口早已改成 3002，契约却仍断言 3000，
+因为那一轮没跑测试所以一直没被发现。
+
+**活体验证**：4 容器（25432/26333/26379/27687）healthy → `init_all` 通过（PG schema + Qdrant
+collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预热 12.6s + 2.3s → 前端
+23002 Ready 4.9s → 同源代理 `/api/health` 指向本项目 → 登录落 `reflexlearn_session` +
+`reflexlearn_csrf` 双 cookie、仅凭 cookie `/auth/me` 200 → `/chat` 输入 `hi` 只回问候、不启动资源
+规划 → **目标 CRUD 全闭环**（创建 id=50 真写 PG、列表可见、PATCH 改名、DELETE、detail 404、
+列表消失，临时数据随删除清理）→ 10 个路由全 200。`tests/unit/test_core.py` 12 passed；
+`scripts` 全量 `bash -n` 通过。
+
+**遗留高危（已定位未修）**：`learning/space_mutations.py` 的 `_delete_goal_relations` 中
+`DELETE FROM path_items ... OR resource_id IN (SELECT id FROM resources WHERE goal_id=$1)`，
+第二个条件会连带删除**其他学习目标路径中**固定了本目标资源的节点（FS-9 允许同一用户跨 space
+固定资源）。正确语义是解绑（`SET resource_id=NULL`）而非删节点。
+
+**未做**：全量单测与 `build_frontend.sh` 未跑（遵用户规矩不自动构建测试）；浏览器端视觉与交互
+未验证，本轮只到 HTTP 层。
 
 ### FS-15 ✅ · PERF-D：启动后台预热 bge 模型（Claude 全栈轮）
 
