@@ -4,7 +4,7 @@
 > 标注「做到哪、改了什么、下一步做什么」。**每完成一轮开发，更新第 5 节（追加本轮）+ 第 6 节（勾掉已完成）+ 第 2.3 节（服务状态）。**
 > single source of truth 是 `docs/00-项目蓝图与里程碑.md`，本文件是它的「执行态快照」。
 
-最后更新：2026-08-11 · 本轮成果：**Claude 接管：审查纠偏 + 工作区基线提交 + 端口收口**——纠正交接文档「3002/8000 有监听即服务在跑」的误判（实为 medical-ppt-agent 与个人作品集站占用，本项目全栈当时未运行）；95 改 + 42 新增文件按 6 个功能域分批提交，建立可回退基线；应用端口迁 28000/23002，`_lib.sh` 新增 `env_port` 让 `.env` 成为端口单一事实源（13 个脚本不再各自硬编码）。全栈活体跑通：4 容器 + API + 前端 + 登录 cookie 链路 + 问候分流 + 目标 CRUD 全闭环 + 10 路由 200。**遗留高危**：删除学习目标的级联 SQL 会误删其他目标路径中引用了本目标资源的节点（详见 FS-16）。上一轮：PERF-D 启动后台预热 bge 模型，性能线 PERF-A/B/C/D 全部落地。
+最后更新：2026-08-11 · 本轮成果：**Claude 接管：审查纠偏 + 工作区基线提交 + 端口收口**——纠正交接文档「3002/8000 有监听即服务在跑」的误判（实为 medical-ppt-agent 与个人作品集站占用，本项目全栈当时未运行）；95 改 + 42 新增文件按 6 个功能域分批提交，建立可回退基线；应用端口迁 28000/23002，`_lib.sh` 新增 `env_port` 让 `.env` 成为端口单一事实源（13 个脚本不再各自硬编码）。全栈活体跑通：4 容器 + API + 前端 + 登录 cookie 链路 + 问候分流 + 目标 CRUD 全闭环 + 10 路由 200。**遗留高危**：删除学习目标的级联 SQL 会误删其他目标路径中引用了本目标资源的节点——**已在 FS-17 修复**（改为解绑，补 5 项测试，真实 PG 活体确证目标 48 节点数不受删除目标 47 影响）。上一轮：PERF-D 启动后台预热 bge 模型，性能线 PERF-A/B/C/D 全部落地。
 
 ---
 
@@ -159,13 +159,36 @@ collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预�
 列表消失，临时数据随删除清理）→ 10 个路由全 200。`tests/unit/test_core.py` 12 passed；
 `scripts` 全量 `bash -n` 通过。
 
-**遗留高危（已定位未修）**：`learning/space_mutations.py` 的 `_delete_goal_relations` 中
+**遗留高危（已在 FS-17 修复）**：`learning/space_mutations.py` 的 `_delete_goal_relations` 中
 `DELETE FROM path_items ... OR resource_id IN (SELECT id FROM resources WHERE goal_id=$1)`，
 第二个条件会连带删除**其他学习目标路径中**固定了本目标资源的节点（FS-9 允许同一用户跨 space
 固定资源）。正确语义是解绑（`SET resource_id=NULL`）而非删节点。
 
 **未做**：全量单测与 `build_frontend.sh` 未跑（遵用户规矩不自动构建测试）；浏览器端视觉与交互
 未验证，本轮只到 HTTP 层。
+
+### FS-17 ✅ · 修复删除学习目标误删其他目标路径节点（Claude 全栈轮）
+
+**根因**：`_delete_goal_relations` 把「本目标的路径节点」和「引用了本目标资源的节点」合并成一条
+带 `OR` 的 DELETE。后者会命中**别的学习目标**的节点——FS-9 的资源固定只校验所有权、不限制同一
+目标，所以同一用户把 A 的资源钉到 B 的节点是合法用法，删 A 却会静默打断 B 的路径。作者写这个 `OR`
+的动机应是避免后续 `DELETE FROM resources` 外键悬空，但用删节点来解决代价过大。
+
+**修复**：拆成两条语句——① 删本目标自己的路径节点；② 其他路径上的引用改为
+`UPDATE path_items SET resource_id=NULL`（解绑而非删除），且顺序上必须早于 `DELETE FROM resources`。
+
+**测试**：新增 `tests/unit/learning/test_space_mutations.py` 5 项（跨目标解绑、解绑早于删资源、
+越权不触碰任何行、内存降级校验 owner、update 带 owner 作用域）——**目标改删此前零测试覆盖**。
+同时修好 `test_workspace_acl_api::test_workspace_lists_filter_by_current_user`：`/api/spaces` 列表
+已改读 `SpaceStore`（与创建、详情同一事实源），测试却仍往只读的 asset store 塞数据，
+自 `list_spaces` 改动起就是红的，改为用真实创建接口种数据。
+
+**真实 PG 活体**：把目标 47 的资源 357 钉到目标 48 的节点 162 → `DELETE /api/spaces/47` →
+目标 48 节点数**仍为 6**（修复前会掉到 5）、节点 162 保留且 `resource_id` 置空、目标 47 的
+goal/资源/路径全部清零。learning 与 api 两个测试套件全绿。
+
+**顺带发现（未处理）**：库里存在标题为 `hi` 的垃圾学习目标（`space_id=49`），是问候分流上线前
+由问候语触发自动建空间留下的；机制已由 `orchestration/intent.py` 堵住，历史脏数据待清理。
 
 ### FS-15 ✅ · PERF-D：启动后台预热 bge 模型（Claude 全栈轮）
 
