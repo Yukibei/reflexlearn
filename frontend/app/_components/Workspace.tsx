@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import type { TutorRuntimeStatus, WorkspaceRuntimeState } from "@/components/chat/tutorRuntime";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { AgentTimeline } from "@/components/resource/AgentTimeline";
+import { MarkdownView } from "@/components/cards/MarkdownView";
 import { ResourceCard } from "@/components/resource/ResourceCard";
 import { DebatePanel } from "@/components/resource/DebatePanel";
 import { LearningPathCard } from "@/components/resource/LearningPathCard";
@@ -190,7 +191,9 @@ export function Workspace({
                   />
                   {turn.assistantMessage ? (
                     <div className="max-w-[680px] text-[14px] leading-6 text-[#303030]">
-                      {turn.assistantMessage}
+                      {/* 学术问答会带代码块、公式与列表，必须走 markdown 渲染；
+                          此前这里是纯文本 div，只够显示短问候。 */}
+                      <MarkdownView content={turn.assistantMessage} />
                     </div>
                   ) : null}
                   <DebatePanel rounds={turn.debateRounds} verdict={turn.verdict} />

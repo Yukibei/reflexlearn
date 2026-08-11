@@ -2,6 +2,8 @@
 
 import { Send, X } from "lucide-react";
 
+import { MarkdownView } from "@/components/cards/MarkdownView";
+
 import type { CompanionStatus } from "./companionState";
 import { STATUS_LABEL } from "./companionState";
 import { CompanionThinking } from "./CompanionThinking";
@@ -70,7 +72,12 @@ export function CompanionPanel({
                   : "bg-[rgb(5_26_36/0.04)] text-slate-700"
               }`}
             >
-              <p className="whitespace-pre-wrap break-words">{turn.text}</p>
+              {turn.role === "companion" ? (
+                // 导师回答含代码块与公式，走 markdown；面板窄，长代码由 .markdown 样式内部滚动
+                <MarkdownView content={turn.text} />
+              ) : (
+                <p className="whitespace-pre-wrap break-words">{turn.text}</p>
+              )}
               {turn.degraded ? (
                 <p className="mt-1 text-[11px] text-amber-600">离线降级回答</p>
               ) : null}
