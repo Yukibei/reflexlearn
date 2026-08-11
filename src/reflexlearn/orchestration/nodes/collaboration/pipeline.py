@@ -4,6 +4,7 @@ import logging
 import time
 
 from reflexlearn.common.config import get_settings
+from reflexlearn.orchestration.nodes.stream_bridge import emit_delta, sink_for, stream_writer
 from reflexlearn.orchestration.state import AgentState
 from reflexlearn.skills.base import SkillContext, SkillResult
 
@@ -34,6 +35,10 @@ async def pipeline_node(state: AgentState) -> dict:
     upstream_content = ""
     rollback_budget = ROLLBACK_BUDGET
     i = 0
+    # PERF-A：流水线同样要把逐 token 增量推给前端。此前只有 generate_resource 接了流式，
+    # 而 planner 常把 collab_mode 判成 pipeline，导致真实会话一帧增量都不出。
+    writer = stream_writer()
+    _log_diag("stream_writer", status="ready" if writer is not None else "none")
 
     while i < len(plan):
         task = plan[i]
@@ -59,7 +64,12 @@ async def pipeline_node(state: AgentState) -> dict:
                 skill=skill_name,
                 status="start",
             )
-            gen = await _run_step(task, upstream_content, issues, skills, ctx)
+            gen_ctx = ctx
+            if writer is not None:
+                # 每次重试前 reset，让前端清掉上一轮失败生成的残留增量
+                emit_delta(writer, task, reset=True)
+                gen_ctx = ctx.model_copy(update={"delta_sink": sink_for(writer, task)})
+            gen = await _run_step(task, upstream_content, issues, skills, gen_ctx)
             _log_diag(
                 "generation_end",
                 task=task,

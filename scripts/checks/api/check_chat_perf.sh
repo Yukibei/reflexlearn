@@ -93,10 +93,13 @@ with httpx.Client(trust_env=False, timeout=240) as c:
 after = llm_counters()
 signal = firsts.get("agent_step") or firsts.get("session")
 ttfc = firsts.get("resource_card")
+ttfd = firsts.get("resource_delta")
 total = firsts.get("done")
 delta = diff(before, after)
 
 print(f"[chat-perf] first_signal={signal}s  TTFC(first resource_card)={ttfc}s  total(done)={total}s")
+# TTFD = 用户看到第一个字的时间，才是真实体感起点；TTFC 是整张卡落定的时间。
+print(f"[chat-perf] TTFD(first resource_delta)={ttfd}s  delta_frames={frames.get('resource_delta', 0)}")
 print(f"[chat-perf] frames={frames}")
 if resource_card_times:
     # 时间分布：若生成阶段边算边发，首末跨度大；若都挤末尾=生成不流式、靠 assemble replay
