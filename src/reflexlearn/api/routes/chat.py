@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends
@@ -20,6 +21,8 @@ from reflexlearn.safety import SafetyGateway, safety_audit_event
 from reflexlearn.security.audit import AuditLog
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 _llm: LLMGateway | None = None
 
@@ -269,8 +272,10 @@ async def event_stream(
         )
         if saved:
             yield sse_event("space_saved", saved)
-    except Exception:
-        pass
+    except Exception as exc:
+        # 沉淀失败不该中断已经产出的对话，但也不能无声无息——否则「资源生成了却没落库」
+        # 只能靠翻数据库才发现。
+        logger.warning("persist session outcome failed: %s: %s", type(exc).__name__, exc)
 
     yield sse_event("done", {"status": "completed"})
 
