@@ -12,12 +12,33 @@ from reflexlearn.api.service_deps import safe_pg_pool
 from reflexlearn.collaboration.traces import get_default_trace_store
 from reflexlearn.common.auth import CurrentUser
 from reflexlearn.learning.spaces import SessionOutcome, get_space_store
+from reflexlearn.learning.tutoring import answer_question
+from reflexlearn.llm_gateway.gateway import LLMGateway
 from reflexlearn.orchestration.graph import run_session
-from reflexlearn.orchestration.intent import resolve_direct_response
+from reflexlearn.orchestration.intent import TutorIntent, classify_intent, direct_reply_for
 from reflexlearn.safety import SafetyGateway, safety_audit_event
 from reflexlearn.security.audit import AuditLog
 
 router = APIRouter()
+
+_llm: LLMGateway | None = None
+
+
+def _get_llm() -> LLMGateway:
+    global _llm
+    if _llm is None:
+        _llm = LLMGateway()
+    return _llm
+
+
+def set_llm_for_tests(gateway) -> None:
+    global _llm
+    _llm = gateway
+
+
+def reset_llm_for_tests() -> None:
+    global _llm
+    _llm = None
 
 
 def sse_event(event: str, payload: dict) -> str:
@@ -81,10 +102,30 @@ async def event_stream(
         yield sse_event("done", {"status": "blocked"})
         return
 
-    direct_response = resolve_direct_response(message)
-    if direct_response is not None:
-        yield sse_event("assistant_message", {"content": direct_response.content})
+    # 意图分流：导师只做学术答疑、生成学习方案、拒绝范围外请求三件事。
+    # 只有 learning_plan 才值得跑完整多智能体链路并沉淀学习目标——其余意图
+    # 走到下面的 run_session 会白花十几次外呼，还会凭空建出一个学习目标。
+    decision = await classify_intent(message, gateway=_get_llm())
+    yield sse_event(
+        "agent_step",
+        {"step": "intent", "detail": f"识别意图：{decision.intent.value}", "source": decision.source},
+    )
+
+    reply = direct_reply_for(decision.intent)
+    if reply is not None:
+        yield sse_event("assistant_message", {"content": reply})
         yield sse_event("done", {"status": "completed"})
+        return
+
+    if decision.intent is TutorIntent.ACADEMIC_QA:
+        result = await answer_question(
+            message,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            gateway=_get_llm(),
+        )
+        yield sse_event("assistant_message", {"content": result.answer})
+        yield sse_event("done", {"status": "completed", "degraded": result.degraded})
         return
 
     # 收集本次会话的可沉淀产出（assemble 资源全文 + path_plan 路径），done 前落空间。

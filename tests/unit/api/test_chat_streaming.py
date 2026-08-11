@@ -1,4 +1,8 @@
-"""PERF-A · /chat 把 generator 增量（__stream__）转成 resource_delta SSE 帧。"""
+"""PERF-A · /chat 把 generator 增量（__stream__）转成 resource_delta SSE 帧。
+
+消息统一用「我想学微积分」：它命中意图分流的 learning_plan 规则，不触发 LLM 分类，
+测试因此保持确定性且不依赖外呼。换成其他措辞会落到问答分支，压根不进 run_session。
+"""
 
 from __future__ import annotations
 
@@ -34,7 +38,7 @@ def test_stream_delta_becomes_resource_delta_sse(monkeypatch):
 
     monkeypatch.setattr(chat_route, "run_session", _streaming)
     client = TestClient(create_app())
-    resp = client.post("/api/chat", json={"message": "讲解一下"}, headers=_headers())
+    resp = client.post("/api/chat", json={"message": "我想学微积分"}, headers=_headers())
 
     assert resp.status_code == 200
     assert "event: resource_delta" in resp.text
@@ -57,7 +61,7 @@ def test_stream_delta_secret_redacted(monkeypatch):
 
     monkeypatch.setattr(chat_route, "run_session", _leaky_delta)
     client = TestClient(create_app())
-    resp = client.post("/api/chat", json={"message": "讲解一下"}, headers=_headers())
+    resp = client.post("/api/chat", json={"message": "我想学微积分"}, headers=_headers())
 
     assert resp.status_code == 200
     assert "sk-ABCDEFGH12345678" not in resp.text

@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 import reflexlearn.api.routes.profile as profile_route
 import reflexlearn.api.routes.tutor as tutor_route
 import reflexlearn.common.db as db
+import reflexlearn.learning.tutoring as tutoring
 from reflexlearn.api.app import create_app
 from reflexlearn.common.auth import CurrentUser, issue_token
 from reflexlearn.common.config import Settings
@@ -54,7 +55,7 @@ class _BrokenGateway:
 
 def test_tutor_ask_degrades_to_offline_answer(monkeypatch):
     _block_pg(monkeypatch)
-    _mock_profile(monkeypatch, tutor_route, {})
+    _mock_profile(monkeypatch, tutoring, {})
     tutor_route.set_gateway_for_tests(_BrokenGateway())
     client = TestClient(create_app())
 
@@ -72,7 +73,7 @@ def test_tutor_ask_injects_profile_context(monkeypatch):
     _block_pg(monkeypatch)
     _mock_profile(
         monkeypatch,
-        tutor_route,
+        tutoring,
         {"weak_points": ["梯度下降", "矩阵求导"], "goal": "机器学习入门"},
     )
     fake = _FakeGateway()
@@ -94,7 +95,7 @@ def test_tutor_ask_injects_profile_context(monkeypatch):
 
 def test_tutor_blocks_prompt_injection(monkeypatch):
     _block_pg(monkeypatch)
-    _mock_profile(monkeypatch, tutor_route, {})
+    _mock_profile(monkeypatch, tutoring, {})
     tutor_route.set_gateway_for_tests(_FakeGateway())
     client = TestClient(create_app())
 

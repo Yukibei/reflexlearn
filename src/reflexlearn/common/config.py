@@ -83,6 +83,7 @@ class Settings(BaseSettings):
     enable_llm_streaming: bool = True    # 生成 Skill 优先走 complete_stream() 逐 token 推增量（PERF-A）；kill-switch 回退一次性
     eval_judge_max_resources: int = 0    # 评测时最多送 Judge 的资源数；0 表示不限制
     enable_metacognition: bool = False   # 元认知 self-refine 默认关，开启后才插入主链路
+    enable_llm_intent: bool = True       # 意图分流：规则判不准时用便宜档 LLM 兜底；关掉则一律按学术问答处理
     max_self_refine: int = 1             # 单轮最多自我改进重试次数，防无限循环
     metacognition_max_reviews: int = 1   # 单轮最多审查资源数，默认只审最值得改的 1 个
     metacognition_timeout_s: float = 12.0  # 元认知单资源审查超时，超时即 noop 降级
