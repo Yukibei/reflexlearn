@@ -1,6 +1,6 @@
 """导师意图分流。
 
-导师智能体只有三种正当行为：学术答疑、生成学习方案/路线/资源、拒绝范围外请求。
+导师智能体处理学术答疑、学习项目状态查询、生成学习方案/路线/资源，并拒绝范围外请求。
 分流先走高置信规则（零延迟），判不准再交给便宜档 LLM。
 
 这里的规则表只是**快路径**，不承担正确性：漏掉的一律落到 LLM，LLM 再失败则回落
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 class TutorIntent(str, Enum):
     SMALL_TALK = "small_talk"
     ACADEMIC_QA = "academic_qa"
+    WORKSPACE_QUERY = "workspace_query"
     LEARNING_PLAN = "learning_plan"
     OUT_OF_SCOPE = "out_of_scope"
 
@@ -78,10 +79,20 @@ _PLAN_PATTERNS = (
     re.compile(r"(备考|应试|复习)(计划|方案|安排)"),
 )
 
+# 项目状态查询必须带有“我的/下一步/当前”等个人上下文，避免把普通知识问答误送到
+# 两阶段工具链。这里只收高置信表达，剩余语义交给分类模型。
+_WORKSPACE_PATTERNS = (
+    re.compile(r"(?:我|我的).{0,8}(?:学到哪|学习进度|学习目标|学习路径|错题|薄弱|弱项|掌握情况)"),
+    re.compile(r"我.{0,4}(?:哪里|哪儿|哪些).{0,4}(?:薄弱|不会|没掌握)"),
+    re.compile(r"(?:接下来|下一步|今天|现在).{0,6}(?:该|应该|要)?(?:学|做|复习)"),
+    re.compile(r"(?:查看|看看|总结|分析).{0,8}我的.{0,8}(?:学习|进度|路径|错题|薄弱)"),
+)
+
 _CLASSIFIER_SYSTEM = (
     "你是学习导师系统的意图分类器。判断学生这句话属于哪一类：\n"
     "- small_talk：寒暄、问候、感谢、附和，没有实际学习诉求。\n"
     "- academic_qa：针对某个知识点、题目或代码的具体提问，回答一次即可。\n"
+    "- workspace_query：询问自己的学习目标、路径进度、薄弱点、错题或下一步行动。\n"
     "- learning_plan：希望系统学习某个主题，需要学习方案、路线或成套资源。\n"
     "- out_of_scope：与学科学习无关的请求，例如闲聊八卦、写作代笔、生活事务。\n"
     '只输出 JSON，格式为 {"intent": "...", "reason": "..."}。'
@@ -97,6 +108,10 @@ def rule_intent(message: str) -> IntentDecision | None:
 
     if _GREETING.match(text):
         return IntentDecision(TutorIntent.SMALL_TALK, "rule", "greeting")
+
+    for pattern in _WORKSPACE_PATTERNS:
+        if pattern.search(text):
+            return IntentDecision(TutorIntent.WORKSPACE_QUERY, "rule", pattern.pattern)
 
     for pattern in _PLAN_PATTERNS:
         if pattern.search(text):

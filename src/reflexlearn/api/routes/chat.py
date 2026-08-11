@@ -13,7 +13,7 @@ from reflexlearn.api.service_deps import safe_pg_pool
 from reflexlearn.collaboration.traces import get_default_trace_store
 from reflexlearn.common.auth import CurrentUser
 from reflexlearn.learning.spaces import SessionOutcome, get_space_store
-from reflexlearn.learning.tutoring import answer_question
+from reflexlearn.learning.tutoring import answer_question, answer_with_workspace
 from reflexlearn.llm_gateway.gateway import LLMGateway
 from reflexlearn.orchestration.graph import run_session
 from reflexlearn.orchestration.intent import TutorIntent, classify_intent, direct_reply_for
@@ -126,6 +126,18 @@ async def event_stream(
             user_id=user_id,
             tenant_id=tenant_id,
             gateway=_get_llm(),
+        )
+        yield sse_event("assistant_message", {"content": result.answer})
+        yield sse_event("done", {"status": "completed", "degraded": result.degraded})
+        return
+
+    if decision.intent is TutorIntent.WORKSPACE_QUERY:
+        result = await answer_with_workspace(
+            message,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            gateway=_get_llm(),
+            pg_pool=pg_pool,
         )
         yield sse_event("assistant_message", {"content": result.answer})
         yield sse_event("done", {"status": "completed", "degraded": result.degraded})

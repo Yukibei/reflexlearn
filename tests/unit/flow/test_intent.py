@@ -62,6 +62,15 @@ def test_rule_marks_explicit_planning_as_learning_plan(message):
 
 @pytest.mark.parametrize(
     "message",
+    ["我学到哪了", "我的学习进度怎么样", "我哪里最薄弱", "接下来该学什么", "看看我的错题"],
+)
+def test_rule_marks_personal_learning_state_as_workspace_query(message):
+    decided = rule_intent(message)
+    assert decided is not None and decided.intent is TutorIntent.WORKSPACE_QUERY
+
+
+@pytest.mark.parametrize(
+    "message",
     ["什么是梯度下降", "梯度下降", "这段代码为什么报错", "熵", "交叉熵和 KL 散度的区别"],
 )
 def test_rule_defers_academic_questions_to_llm(message):
@@ -78,6 +87,15 @@ async def test_llm_verdict_is_used_when_rules_defer():
     assert decision.source == "llm"
     # 分类属于评判类任务，应走便宜档而不是主力生成模型
     assert gateway.calls[0]["task_type"] == "judgment"
+
+
+async def test_llm_can_classify_workspace_query_when_rules_defer():
+    gateway = _FakeGateway(text='{"intent": "workspace_query", "reason": "询问个人学习状态"}')
+
+    decision = await classify_intent("帮我复盘一下最近的状态", gateway=gateway, settings=_S())
+
+    assert decision.intent is TutorIntent.WORKSPACE_QUERY
+    assert decision.source == "llm"
 
 
 async def test_llm_failure_falls_back_to_academic_qa_not_learning_plan():

@@ -15,6 +15,7 @@ from reflexlearn.api.app import create_app
 from reflexlearn.common.auth import CurrentUser, issue_token
 from reflexlearn.common.config import Settings
 from reflexlearn.learning.spaces import reset_space_store_for_tests
+from reflexlearn.learning.tutoring import TutorAnswer
 
 
 @pytest.fixture(autouse=True)
@@ -115,3 +116,23 @@ def test_academic_qa_answers_without_creating_space(monkeypatch):
     assert graph.called is False
     assert "event: space_saved" not in resp.text
     assert "event: assistant_message" in resp.text
+
+
+def test_workspace_query_reads_project_without_running_graph(monkeypatch):
+    graph = _SpyGraph()
+    monkeypatch.setattr(chat_route, "run_session", graph)
+
+    async def _answer(question, **_kwargs):
+        assert question == "接下来该学什么？"
+        return TutorAnswer(answer="下一步完成学习路径第 3 步。")
+
+    monkeypatch.setattr(chat_route, "answer_with_workspace", _answer)
+    client = TestClient(create_app())
+    resp = client.post(
+        "/api/chat", json={"message": "接下来该学什么？"}, headers=_headers()
+    )
+
+    assert resp.status_code == 200
+    assert graph.called is False
+    assert "下一步完成学习路径第 3 步" in resp.text
+    assert "event: space_saved" not in resp.text

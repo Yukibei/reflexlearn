@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Literal
 
 from reflexlearn.learning.mistakes import MistakeStore
 from reflexlearn.learning.path_ops import load_active_path_items
@@ -22,7 +23,9 @@ from reflexlearn.memory import session_store
 
 logger = logging.getLogger(__name__)
 
-TOOL_CATALOG: dict[str, str] = {
+ToolName = Literal["learning_goals", "active_path", "learner_profile", "recent_mistakes"]
+
+TOOL_CATALOG: dict[ToolName, str] = {
     "learning_goals": "用户的学习目标列表与各自状态",
     "active_path": "当前学习路径的节点、掌握状态与下一步该学什么",
     "learner_profile": "学习画像：当前目标、薄弱点、知识掌握度",
@@ -33,7 +36,7 @@ _EMPTY = "（暂无数据）"
 
 
 async def collect_context(
-    names: list[str],
+    names: list[ToolName],
     *,
     user_id: str,
     tenant_id: str,
@@ -53,7 +56,7 @@ async def collect_context(
     return "\n\n".join(sections)
 
 
-async def _run_tool(name: str, *, user_id: str, tenant_id: str, pg_pool) -> str:
+async def _run_tool(name: ToolName, *, user_id: str, tenant_id: str, pg_pool) -> str:
     if name == "learning_goals":
         return await _learning_goals(user_id, tenant_id, pg_pool)
     if name == "active_path":

@@ -14,9 +14,11 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from reflexlearn.api.deps import get_current_user
+from reflexlearn.api.service_deps import safe_pg_pool
 from reflexlearn.common.auth import CurrentUser
-from reflexlearn.learning.tutoring import answer_question
+from reflexlearn.learning.tutoring import answer_question, answer_with_workspace
 from reflexlearn.llm_gateway.gateway import LLMGateway
+from reflexlearn.orchestration.intent import TutorIntent, rule_intent
 from reflexlearn.safety import SafetyGateway
 
 logger = logging.getLogger(__name__)
@@ -60,11 +62,21 @@ async def tutor_ask(req: TutorAskRequest, user: CurrentUser = Depends(get_curren
     if not decision.allowed:
         return TutorReply(answer="", blocked=True, reasons=decision.reasons)
 
-    result = await answer_question(
-        req.question,
-        user_id=user.user_id,
-        tenant_id=user.tenant_id,
-        gateway=_get_gateway(),
-        context_hint=req.context_hint,
-    )
+    intent = rule_intent(req.question)
+    if intent is not None and intent.intent is TutorIntent.WORKSPACE_QUERY:
+        result = await answer_with_workspace(
+            req.question,
+            user_id=user.user_id,
+            tenant_id=user.tenant_id,
+            gateway=_get_gateway(),
+            pg_pool=await safe_pg_pool(),
+        )
+    else:
+        result = await answer_question(
+            req.question,
+            user_id=user.user_id,
+            tenant_id=user.tenant_id,
+            gateway=_get_gateway(),
+            context_hint=req.context_hint,
+        )
     return TutorReply(answer=result.answer, degraded=result.degraded)
