@@ -4,7 +4,7 @@
 > 标注「做到哪、改了什么、下一步做什么」。**每完成一轮开发，更新第 5 节（追加本轮）+ 第 6 节（勾掉已完成）+ 第 2.3 节（服务状态）。**
 > single source of truth 是 `docs/00-项目蓝图与里程碑.md`，本文件是它的「执行态快照」。
 
-最后更新：2026-08-11 · 本轮成果：**Claude 接管：审查纠偏 + 工作区基线提交 + 端口收口**——纠正交接文档「3002/8000 有监听即服务在跑」的误判（实为 medical-ppt-agent 与个人作品集站占用，本项目全栈当时未运行）；95 改 + 42 新增文件按 6 个功能域分批提交，建立可回退基线；应用端口迁 28000/23002，`_lib.sh` 新增 `env_port` 让 `.env` 成为端口单一事实源（13 个脚本不再各自硬编码）。全栈活体跑通：4 容器 + API + 前端 + 登录 cookie 链路 + 问候分流 + 目标 CRUD 全闭环 + 10 路由 200。**遗留高危**：删除学习目标的级联 SQL 会误删其他目标路径中引用了本目标资源的节点——**已在 FS-17 修复**（改为解绑，补 5 项测试，真实 PG 活体确证目标 48 节点数不受删除目标 47 影响）。上一轮：PERF-D 启动后台预热 bge 模型，性能线 PERF-A/B/C/D 全部落地。
+最后更新：2026-08-11 · 本轮成果：**能力边界体检 + 导师意图分流 + 流式失效根治**——体检划清「真实能力 vs 降级占位」并落 `discuss/2026-08-11-能力边界体检报告.md`；导师按能力边界分四类意图（寒暄 0s / 学术问答 17s / 范围外 5s / 学习方案走完整链路），判不准回落问答而非最贵分支，「一句 hi 建出一套学习资源」的根因就此堵住；**流式失效根治**——根因是 PERF-A 只接了中心化 fan-out 而真实会话走流水线模式，抽 `stream_bridge` 供两种模式共用后 **TTFD 无穷 → 31.42s、增量帧 0 → 836**。另清理 3 个垃圾学习目标（孤儿数据为 0）、沉淀失败不再静默吞异常、修好两处早已变红却没人发现的断言。**待办**：总时长仍 280s（15 次串行 LLM）、知识库仅 15 点、其余关闭态开关待逐个验证。上一轮：FS-17 修复删除目标误删其他目标路径节点。
 
 ---
 
@@ -166,6 +166,49 @@ collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预�
 
 **未做**：全量单测与 `build_frontend.sh` 未跑（遵用户规矩不自动构建测试）；浏览器端视觉与交互
 未验证，本轮只到 HTTP 层。
+
+### FS-18 ✅ · 能力边界体检 + 导师意图分流 + 流式失效根治（Claude 全栈轮）
+
+**能力边界体检**（`discuss/2026-08-11-能力边界体检报告.md`）：逐条实测「真实能力 vs 降级占位」。
+真实可用：LLM 中转站（gpt-5.5，4.4s）、认证会话、目标 CRUD、B 站与 MDN 实时搜索、资源生成、
+数据持久化。降级或未接通：token 流式（0 帧）、path_plan 本次 ValidationError 降规则、视频占位、
+`knowledge_chunks` 仅 15 点、图谱检索/元认知/promote/autogrow/Kafka/MinIO/便宜档路由全为关闭态
+（用户确认属遗漏而非有意）。
+
+**垃圾数据清理**：删除标题为 `hi` 的目标等 3 个测试残留（19 → 16），孤儿资源/孤儿节点/
+悬空 resource_id 均为 0。
+
+**导师意图分流**：旧实现是 8 个问候词的精确匹配集合，只拦得住字面量 `hi`，「你好呀」「谢谢」
+「嗯」全部漏过并触发完整链路（15 次 LLM + 凭空建目标）。重写为四类分类器
+（small_talk / academic_qa / learning_plan / out_of_scope）：高置信规则走快路径，判不准交便宜档
+LLM，LLM 再失败**回落 academic_qa**——降级方向是刻意的，旧版判不准时倒向最贵分支正是病根。
+刻意不做「消息短就算寒暄」（「熵」「秩」这类单字学术词会被误伤）。答疑实现抽到
+`learning/tutoring.py`，`/tutor/ask` 与 `/chat` 问答分流共用。活体：`你好呀` 0s、
+`什么是梯度下降…` 17s、`帮我写辞职信` 5s（礼貌拒绝），三次对话后目标数不变；此前这三种输入
+都要约 265 秒并各建一个目标。
+
+**流式失效根治**：根因是 PERF-A 的流式只接在 `generate_resource`（中心化 fan-out）上，而 planner
+常把 `collab_mode` 判成 `pipeline`，真实会话走 `pipeline_node` —— 那里一处流式接线都没有。
+排查按层隔离并留证据：网关层探针实测 `complete_stream` 产出 48 个增量（正常）；LangGraph 层
+最小复现 `Send` + `get_stream_writer`（custom 帧正常）；接线层三处都对；最后靠日志里
+**只有 `pipeline_diag` 没有 `generator_diag`** 定位到走错分支。修复：抽 `nodes/stream_bridge.py`
+供两种模式共用（避免复制一份导致下次仍只改一边），`pipeline_node` 接入；`sink_for` 用默认参数
+绑定 task（流水线 while 循环复用闭包变量，不绑定则增量全挂最后一个 task）。
+**实测 TTFD 无穷 → 31.42s，delta_frames 0 → 836**；TTFC 261s / total 282s 基本不变
+（总时长由 6 个资源生成决定，属下一条待办）。
+
+**沉淀失败不再静默**：`chat.py` 的 `except Exception: pass` 改为 warning 日志。此前「资源生成了
+却没落库」完全无声，只能翻库才发现；本轮正是靠这条日志才发现 `SessionPathStep` 的
+`sequence/task_id/resource_type` 三项必填、缺一项即 ValidationError。
+
+**测试**：新增 `test_intent.py` 27 项、`test_chat_intent_routing.py` 3 项（用假 run_session 把
+十分钟的真实会话压成秒级契约测试）、`test_pipeline_streaming.py` 3 项；修好 `test_core.py`（默认
+端口早已改 3002 而契约仍断言 3000）与 `test_workspace_acl_api.py`（列表已改读 SpaceStore）两处
+**早就变红却没人发现**的断言。`check_chat_perf.sh` 新增 TTFD 指标——此前探针只测 TTFC，
+测不出「到底有没有增量」。
+
+**未做**：总时长 280s 未动；`path_plan` ValidationError 是否稳定复现未确认；知识库仍只有 15 点；
+其余关闭态开关尚未逐个验证；`chat.py` 已 383 行、`learning/` 22 文件，均超规约待治理。
 
 ### FS-17 ✅ · 修复删除学习目标误删其他目标路径节点（Claude 全栈轮）
 
