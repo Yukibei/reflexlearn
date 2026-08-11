@@ -33,6 +33,22 @@ wait_for_url() {
   return 1
 }
 
+wait_for_api() {
+  local url="$1"
+  local attempt body
+
+  for attempt in $(seq 1 60); do
+    body="$(curl --fail --silent --show-error --max-time 10 "$url" 2>/dev/null || true)"
+    if grep -Eq '"service"[[:space:]]*:[[:space:]]*"reflexlearn-api"' <<<"$body"; then
+      printf 'FastAPI 已就绪，服务身份为 reflexlearn-api。\n'
+      return 0
+    fi
+    sleep 2
+  done
+  echo "FastAPI 未在 120 秒内返回 reflexlearn-api 服务身份" >&2
+  return 1
+}
+
 {
   log_header "check_production"
   compose config --quiet
@@ -43,7 +59,7 @@ wait_for_url() {
       exit 1
     }
   done
-  wait_for_url http://127.0.0.1:18000/api/health "FastAPI"
+  wait_for_api http://127.0.0.1:18000/api/health
   wait_for_url http://127.0.0.1:13000/ "Next.js"
   wait_for_url https://learn.liyilin.xyz/ "公网 HTTPS"
   compose ps

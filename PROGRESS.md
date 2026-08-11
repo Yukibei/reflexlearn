@@ -4,7 +4,7 @@
 > 标注「做到哪、改了什么、下一步做什么」。**每完成一轮开发，更新第 5 节（追加本轮）+ 第 6 节（勾掉已完成）+ 第 2.3 节（服务状态）。**
 > single source of truth 是 `docs/00-项目蓝图与里程碑.md`，本文件是它的「执行态快照」。
 
-最后更新：2026-08-11 · 本轮成果：**能力边界体检 + 导师意图分流 + 流式失效根治 + 导师回答 markdown 化**——体检划清「真实能力 vs 降级占位」并落 `discuss/2026-08-11-能力边界体检报告.md`；导师按能力边界分四类意图（寒暄 0s / 学术问答 17s / 范围外 5s / 学习方案走完整链路），判不准回落问答而非最贵分支，「一句 hi 建出一套学习资源」的根因就此堵住；**流式失效根治**——根因是 PERF-A 只接了中心化 fan-out 而真实会话走流水线模式，抽 `stream_bridge` 供两种模式共用后 **TTFD 无穷 → 31.42s、增量帧 0 → 836**；导师回答改走 MarkdownView（此前代码块被原样吐出）。另清理 3 个垃圾学习目标、沉淀失败不再静默吞异常、修好两处早已变红却没人发现的断言。**进行中（FS-19）**：导师管家工具集已实现但未接线，剩余步骤见 FS-19。**待办**：总时长仍 280s（15 次串行 LLM）、历史对话缺失、知识库仅 15 点、其余关闭态开关待逐个验证。
+最后更新：2026-08-11 · 本轮成果：**导师管家工具链完成并进入发布准备**。意图分流新增 `workspace_query`；导师按问题选择学习目标、当前路径、学习画像、近期错题四类无参只读工具，再基于真实项目上下文回答。`/chat` 与牛牛浮窗均已接线，普通学术问答仍保持一次 LLM 外呼，只有项目状态查询走两阶段调用；工具选择失败回落画像 + 当前路径，回答失败回落离线辅导。涉及意图、工具降级、两阶段调用和双 API 分流的定向测试 **47 passed**。新增带 SHA-256 校验、源码备份与失败恢复的 API 归档/远端安装/单入口发布脚本。**待办**：历史对话缺失、学习方案总时长仍约 280s、知识库仅 15 个分块、其余关闭态开关待逐个验证。
 
 ---
 
@@ -87,6 +87,11 @@ curl -N -s --noproxy '*' -X POST http://127.0.0.1:28000/api/chat \
 
 ### 2.3 当前服务状态（跨会话会失效，用上方命令重启）
 
+- **2026-08-11 生产发布前检查**：`https://learn.liyilin.xyz/` 返回 200，但
+  `https://learn.liyilin.xyz/api/health` 返回 500，生产 API 链路当前异常。现有专用密钥
+  `E:\yuki.pem` 可读，但 Windows SSH 配置中的 `yuki-vps` 别名文件受 ACL 限制，当前进程无法解析
+  实际用户与主机；已停止猜测账户。代码侧已补 `scripts/release_api_production.sh`，恢复正确的
+  `用户@主机` 后即可按第 09 号文档执行带校验、备份和回滚的发布。
 - **2026-08-11 当前态（FS-16）**：中间件 4 容器已起并 healthy（PG 25432 / Redis 26379 /
   Qdrant 26333 / Neo4j 27687），API `:28000`、前端 `:23002` 均在运行且经同源代理连通。
   **应用与中间件端口已整体迁到 2xxxx 段**，本节下方历史条目里的 `1xxxx` / `8000` / `3000` /
@@ -167,7 +172,7 @@ collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预�
 **未做**：全量单测与 `build_frontend.sh` 未跑（遵用户规矩不自动构建测试）；浏览器端视觉与交互
 未验证，本轮只到 HTTP 层。
 
-### FS-19 🚧 · 导师回答 markdown 化（已完成）+ 管家工具集（WIP，待接线）
+### FS-19 ✅ · 导师回答 markdown 化 + 管家只读工具链
 
 **已完成 · 导师回答走 markdown**：`assistant_message` 此前在两处都按纯文本渲染
 （`Workspace.tsx` 直接把字符串塞进 div、`CompanionPanel` 用 `whitespace-pre-wrap`）。
@@ -175,14 +180,11 @@ collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预�
 纯文本会把 ` ```text ` 原样显示。两处统一改用既有 `MarkdownView`（资源卡一直在用），
 未新造组件；`.ws-root .markdown` 亮色适配此前已做。`npx tsc --noEmit` 通过。
 
-**WIP · 导师管家工具集**：用户指出「AI 学习导师应纵观整个学习项目、是项目的管家，
-不只是一个能聊天的智能体」。现状是导师只能"说"——答题时只拿得到画像里的薄弱点，
-看不到学习目标、路径进度、错题本。
-
-已落地 `learning/tutor_tools.py`：把项目已有领域接口暴露成 4 个**无参只读**工具
+**已完成 · 导师管家工具集**：`learning/tutor_tools.py` 把项目已有领域接口暴露成 4 个
+**无参只读**工具
 （`learning_goals` / `active_path` / `learner_profile` / `recent_mistakes`），
 `collect_context(names, user_id, tenant_id, pg_pool)` 执行并拼成可读上下文，
-单个工具失败降级不中断。**模块可 import，但尚未接线、尚无测试。**
+单个工具失败只降级自己的上下文段，不中断整次回答。
 
 设计取舍（接手请沿用）：
 - **只读**：写操作（改路径/删目标）误伤学习记录的代价远高于收益，第一版不给；
@@ -190,16 +192,21 @@ collections/indexes + Neo4j 种子）→ API `reflexlearn-api` @28000、bge 预�
 - **无参数**：LLM 只从固定清单挑名字，不构造参数，调错概率大幅降低。
 - **身份注入**：user_id/tenant_id 由调用方传，LLM 无法指定查谁的数据。
 
-**剩余接线步骤**：
-1. `orchestration/intent.py` 新增第五类意图 `workspace_query`（问自己的学习状态，
-   如「我学到哪了」「接下来该做什么」「我哪里最薄弱」），并在 `_CLASSIFIER_SYSTEM` 补该类描述。
-2. `learning/tutoring.py` 新增 `answer_with_workspace(...)`：两阶段——
-   第一次 LLM 从 `TOOL_CATALOG` 选工具（schema 约束返回 `{"tools": [...]}`），
-   执行 `collect_context` 后第二次 LLM 带上下文作答。选工具失败时降级为默认调
-   `learner_profile` + `active_path`，仍能作答。
-3. `api/routes/chat.py` 的分流加 `workspace_query` 分支（复用 academic_qa 的结构）。
-4. 测试：工具集降级、意图新类、两阶段调用、以及"LLM 挂了仍能作答"。
-5. 预期代价：该类问答变成 2 次 LLM 往返（约 20–30s），只影响这一类，不影响纯学科问答。
+**接线结果**：
+1. `orchestration/intent.py` 新增第五类 `workspace_query`，高置信个人状态问法零外呼命中，
+   其余由结构化 LLM 分类；判不准仍回落 `academic_qa`。
+2. `learning/tutoring.py` 新增 `answer_with_workspace(...)`：第一次 LLM 用 Pydantic schema 从
+   `TOOL_CATALOG` 选择最少工具，读取真实上下文后第二次 LLM 作答。工具名强类型与目录同源；
+   选择失败默认读取 `learner_profile` + `active_path`。
+3. `/chat` 的 `workspace_query` 不进入 `run_session`、不创建学习目标；牛牛浮窗对高置信项目查询
+   同样走管家链路，普通学术问答不增加分类外呼。
+4. 定向测试覆盖工具单项降级、规则与 LLM 新意图、两阶段调用、选择器/回答故障降级、双 API
+   分流，共 **47 passed, 1 warning**。
+5. 代价保持在预期边界：仅项目状态查询增加为 2 次 LLM 往返，学术问答仍为 1 次。
+
+**发布准备**：新增 `package_api_production.sh`、`ops/install_api_release.sh`、
+`release_api_production.sh`。发布包不含 `.env`/密钥，远端安装前校验 SHA-256 与归档路径；部署前
+备份 API 源码，复用 `deploy_api_production.sh` 的镜像回滚，失败时源码与镜像一起恢复。
 
 **用户反馈中尚未解决的两项**：
 - **牛牛面板疑似跳转 `/chat`**：用户报告「主页点击小牛发送信息会被直接跳转到 /chat」，
