@@ -34,8 +34,7 @@ compose() {
 
 current_container="$(compose ps -q web)"
 [[ -n "$current_container" ]] || { echo "生产 Web 容器不存在" >&2; exit 1; }
-current_image="$("$(docker_cmd)" inspect --format '{{.Image}}' "$current_container")"
-"$(docker_cmd)" tag "$current_image" "$ROLLBACK_TAG"
+"$(docker_cmd)" commit "$current_container" "$ROLLBACK_TAG" >/dev/null
 
 recover_failed_deployment() {
   local status=$?
