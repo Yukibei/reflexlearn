@@ -72,7 +72,6 @@ tar -xzf "$REMOTE_RUNTIME_ARCHIVE" -C "$STAGE_DIR/runtime-image"
 docker build --pull=false \
   --file "$STAGE_DIR/runtime-image/Dockerfile.frontend.runtime" \
   --tag "reflexlearn-web:$VERSION" \
-  --tag reflexlearn-web:latest \
   "$STAGE_DIR/runtime-image"
 
 mv "$PROJECT_ROOT/frontend" "$BACKUP_DIR/frontend"

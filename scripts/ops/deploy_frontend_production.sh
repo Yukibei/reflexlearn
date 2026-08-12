@@ -34,7 +34,21 @@ compose() {
 
 current_container="$(compose ps -q web)"
 [[ -n "$current_container" ]] || { echo "生产 Web 容器不存在" >&2; exit 1; }
-"$(docker_cmd)" commit "$current_container" "$ROLLBACK_TAG" >/dev/null
+current_image="$("$(docker_cmd)" inspect --format '{{.Image}}' "$current_container")"
+if "$(docker_cmd)" image inspect "$current_image" >/dev/null 2>&1; then
+  "$(docker_cmd)" tag "$current_image" "$ROLLBACK_TAG"
+else
+  current_release_file="$PROJECT_ROOT/runtime/current-frontend-release"
+  [[ -f "$current_release_file" ]] || {
+    echo "当前 Web 镜像不可寻址，且缺少已验证 release 标记" >&2
+    exit 1
+  }
+  current_release="$(head -n 1 "$current_release_file")"
+  fallback_image="reflexlearn-rollback/web:$current_release"
+  "$(docker_cmd)" image inspect "$fallback_image" >/dev/null
+  "$(docker_cmd)" tag "$fallback_image" "$ROLLBACK_TAG"
+  echo "当前 Web 镜像元数据缺失，回滚基线使用：$fallback_image" >&2
+fi
 
 recover_failed_deployment() {
   local status=$?
@@ -51,7 +65,8 @@ trap recover_failed_deployment ERR
   log_header "deploy_frontend_production $VERSION"
   compose config --quiet
   if [[ "$DEPLOY_MODE" == --use-loaded-image ]]; then
-    "$(docker_cmd)" image inspect reflexlearn-web:latest >/dev/null
+    "$(docker_cmd)" image inspect "reflexlearn-web:$VERSION" >/dev/null
+    "$(docker_cmd)" tag "reflexlearn-web:$VERSION" reflexlearn-web:latest
   else
     compose build web
   fi
