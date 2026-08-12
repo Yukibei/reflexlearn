@@ -12,6 +12,7 @@ INSTALLER="$PROJECT_ROOT/scripts/ops/install_frontend_release.sh"
 REMOTE_SOURCE="/tmp/reflexlearn-frontend-$VERSION.tar.gz"
 REMOTE_RUNTIME="/tmp/reflexlearn-web-runtime-$VERSION.tar.gz"
 REMOTE_INSTALLER="/tmp/install-reflexlearn-frontend-$VERSION.sh"
+PRODUCTION_BACKEND_ORIGIN="${REFLEXLEARN_PRODUCTION_BACKEND_ORIGIN:-http://api:8000}"
 
 [[ "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]] || {
   echo "用法: $0 <版本> <SSH 用户@主机>" >&2
@@ -35,7 +36,8 @@ ensure_logs
 cd_root
 {
   log_header "release_frontend_production $VERSION"
-  bash "$SCRIPT_DIR/build_frontend.sh"
+  BACKEND_ORIGIN="$PRODUCTION_BACKEND_ORIGIN" \
+    bash "$SCRIPT_DIR/build_frontend.sh"
   bash "$SCRIPT_DIR/package_frontend_production.sh" "$VERSION"
   bash "$SCRIPT_DIR/package_frontend_runtime.sh" "$VERSION"
   source_sha="$(sha256sum "$SOURCE_ARCHIVE" | awk '{print $1}')"
