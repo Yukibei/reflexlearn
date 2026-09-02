@@ -20,7 +20,6 @@ from reflexlearn.orchestration.nodes.collaboration.pipeline import pipeline_node
 from reflexlearn.orchestration.nodes.planning.path_plan import path_plan_node
 from reflexlearn.memory.manager import MemoryManager, recall_memory_node
 from reflexlearn.orchestration.persist import (
-    drain_persist_tasks,
     persist_session,
     spawn_persist,
 )
