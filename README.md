@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-111827)](https://langchain-ai.github.io/langgraph/)
-[![Tests](https://img.shields.io/badge/tests-366%20passed-2ea44f)](./scripts/test_unit.sh)
+[![CI](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml/badge.svg)](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml)`r`n[![Tests](https://img.shields.io/badge/tests-650%20passed%20%7C%204%20skipped-2ea44f)](./scripts/test_unit.sh)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 **Demo status:** runnable end-to-end prototype · **Primary focus:** agent orchestration, RAG quality, evaluation and recovery
@@ -144,7 +144,7 @@ discuss/                          计划、评审、阶段路线讨论文档
 
 最近一次本地验证结果（以仓库脚本输出为准）：
 
-- `bash scripts/test_unit.sh`：366 passed, 2 warnings。
+- `bash scripts/test_unit.sh`：650 passed, 4 skipped（GitHub Actions CI）。
 - `bash scripts/build_frontend.sh`：通过。
 - `bash -n scripts/*.sh`：通过。
 - `bash scripts/check_api_security.sh`：通过。
@@ -209,4 +209,4 @@ git commit -m "更新说明"
 git push
 ```
 
-如果后续接入 Vercel、Render、GitHub Actions 或服务器部署脚本，可以基于 GitHub main 分支配置自动构建和自动发布；当前仓库还没有配置生产 CI/CD，不能视为已经自动部署。
+仓库已配置 GitHub Actions CI：每次推送和 Pull Request 会自动安装依赖、执行单元测试、校验脚本语法并运行 Ruff 源码检查。CI 通过代表代码质量门禁通过，不等同于生产环境部署。
