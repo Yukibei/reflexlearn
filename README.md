@@ -6,7 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-111827)](https://langchain-ai.github.io/langgraph/)
 [![Tests](https://img.shields.io/badge/tests-366%20passed-2ea44f)](./scripts/test_unit.sh)
-[![License](https://img.shields.io/badge/license-not%20selected-lightgrey)](#license)
+[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 **Demo status:** runnable end-to-end prototype · **Primary focus:** agent orchestration, RAG quality, evaluation and recovery
 
