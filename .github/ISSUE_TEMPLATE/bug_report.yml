@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible problem in ReflexLearn.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先搜索已有 issue，并移除密钥、真实用户数据和敏感日志。
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Provide the smallest command, input, or fixture that reproduces the problem.
+      placeholder: bash scripts/check_api.sh
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Python 3.11 / OS / commit SHA / relevant service versions
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Redact secrets and personal data before attaching evidence.
