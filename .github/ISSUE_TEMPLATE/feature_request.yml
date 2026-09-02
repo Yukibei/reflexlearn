@@ -1,0 +1,30 @@
+name: Feature request
+description: Propose a focused improvement to the agent, RAG, evaluation, or developer workflow.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user or maintainer problem does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest useful behavior and its boundaries.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and trade-offs
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Include tests, fixtures, metrics, or documentation updates.
+    validations:
+      required: true
