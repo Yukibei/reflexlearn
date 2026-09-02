@@ -1,5 +1,30 @@
 # ReflexLearn
 
+> A self-evolving multi-agent learning system for turning a learning goal into a verified, adaptive resource plan.
+
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-111827)](https://langchain-ai.github.io/langgraph/)
+[![Tests](https://img.shields.io/badge/tests-366%20passed-2ea44f)](./scripts/test_unit.sh)
+[![License](https://img.shields.io/badge/license-not%20selected-lightgrey)](#license)
+
+**Demo status:** runnable end-to-end prototype · **Primary focus:** agent orchestration, RAG quality, evaluation and recovery
+
+### Why this project exists
+
+Most agent demos stop after the first generated answer. ReflexLearn treats generation as a workflow that must be inspected, scored and improved: profile the learner, retrieve evidence, plan resources, generate, run quality gates, reflect on failures, and assemble an adaptive path.
+
+### See it in one minute
+
+| Evidence | What to inspect |
+| --- | --- |
+| [Pipeline walkthrough](./reflexlearn-e2e-pipeline.png) | Stage-by-stage orchestration and intermediate state |
+| [Debate result](./reflexlearn-e2e-debate.png) | Critic / debate / judge quality loop |
+| [Video task](./reflexlearn-e2e-video.png) | Long-running task and degraded-mode handling |
+| [Evaluation notes](./docs/08-评测报告与消融结果.md) | Baseline comparison and known sample-size limits |
+
+The project is deliberately honest about its maturity: it is a strong engineering prototype with a real frontend, security guards, integration scripts and evaluation hooks, not a claim of production readiness.
+
 ReflexLearn 是一个面向“自进化学习资源生成”的多智能体系统原型。它围绕学习目标输入，完成学习画像构建、资源规划、检索增强生成、质量验收、反思重规划、辩论裁决、学习路径生成和前端交互展示。
 
 当前项目已具备可演示的端到端闭环，但仍处于原型到产品化之间的阶段：P0 最小安全底座已经落地，真正的生产级用户体系、对象级权限、内容审核网关、上传隔离区和部署流水线还需要继续补强。
@@ -115,9 +140,9 @@ docs/                             正式设计文档
 discuss/                          计划、评审、阶段路线讨论文档
 ```
 
-## 当前状态
+## Current verification snapshot
 
-最近一次回报的验证结果：
+最近一次本地验证结果（以仓库脚本输出为准）：
 
 - `bash scripts/test_unit.sh`：366 passed, 2 warnings。
 - `bash scripts/build_frontend.sh`：通过。
@@ -129,6 +154,8 @@ discuss/                          计划、评审、阶段路线讨论文档
 - `bash scripts/check_llm.sh`：OpenAI-compatible timicc /responses 中转通过，返回合法 JSON。
 - `bash scripts/run_eval.sh --compare --tags ablation,rag_required --strategies controlled_rag,single_agent_baseline --max-cases 1 --timeout 45`：通过，`controlled_rag overall=0.4967`，`single_agent_baseline overall=0.1800`，当前 Judge 来源为 `LLM 或混合`。
 - `bash scripts/run_real_eval.sh --tags ablation,rag_required --strategies real_full,real_no_rag,single_agent_baseline --max-cases 1 --timeout 180`：通过，`real_full overall=0.6900`，`real_no_rag overall=0.5467`，`single_agent_baseline overall=0.2000`。
+
+这些数字用于说明评测链路可以运行，不代表最终论文结论；真实 RAG 目前仍是小样本，欢迎贡献更多 case、人工标注和可重复的消融实验。
 
 ## 已知限制
 
@@ -155,6 +182,21 @@ discuss/                          计划、评审、阶段路线讨论文档
 - [开发进度与交接审查说明](docs/10-开发进度与交接审查说明.md)
 - [发展路线图](docs/11-发展路线图.md)
 - [阶段二任务派工书](docs/12-阶段二任务派工书.md)
+
+## Contributing
+
+欢迎从小而完整的改进开始：
+
+1. 先阅读 [贡献指南](CONTRIBUTING.md) 和对应模块文档。
+2. 新行为请附测试或可复现脚本；评测改动请说明数据集、策略和限制。
+3. 一个 PR 只解决一个问题，并在描述中写清动机、验证命令和已知风险。
+4. 安全问题请不要公开提交 issue，先通过 GitHub Security Advisories 联系维护者。
+
+适合第一次参与的方向：补充英文文档、完善示例数据、扩展评测 case、修复边界条件测试。
+
+## License
+
+尚未选择正式开源许可证。当前仓库内容默认保留版权；在许可证确定前，请不要将代码作为依赖分发。
 
 ## GitHub 发布与后续更新
 
