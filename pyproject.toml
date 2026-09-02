@@ -16,6 +16,7 @@ dependencies = [
     "langchain-core>=0.3",
     # LLM
     "litellm>=1.40",
+    "rank-bm25>=0.2.2",
     # 向量 / 图 / 关系
     "qdrant-client>=1.9",
     "asyncpg>=0.29",
