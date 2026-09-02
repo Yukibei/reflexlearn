@@ -5,7 +5,8 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-orchestration-111827)](https://langchain-ai.github.io/langgraph/)
-[![CI](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml/badge.svg)](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml)`r`n[![Tests](https://img.shields.io/badge/tests-650%20passed%20%7C%204%20skipped-2ea44f)](./scripts/test_unit.sh)
+[![CI](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml/badge.svg)](https://github.com/Yukibei/reflexlearn/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-650%20passed%20%7C%204%20skipped-2ea44f)](./scripts/test_unit.sh)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 **Demo status:** runnable end-to-end prototype · **Primary focus:** agent orchestration, RAG quality, evaluation and recovery
@@ -196,7 +197,7 @@ discuss/                          计划、评审、阶段路线讨论文档
 
 ## License
 
-尚未选择正式开源许可证。当前仓库内容默认保留版权；在许可证确定前，请不要将代码作为依赖分发。
+本项目采用 [MIT License](LICENSE)，欢迎在遵守许可证条款的前提下使用、修改和分发。
 
 ## GitHub 发布与后续更新
 
