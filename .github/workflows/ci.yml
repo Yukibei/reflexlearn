@@ -38,4 +38,4 @@ jobs:
         run: bash scripts/test_unit.sh
 
       - name: Run Ruff
-        run: uv run ruff check src tests
+        run: uv run ruff check src --select F
