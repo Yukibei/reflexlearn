@@ -74,7 +74,7 @@ def test_secret_in_output_redacted_via_chat(monkeypatch):
 
     monkeypatch.setattr(chat_route, "run_session", _leaky)
     client = TestClient(create_app())
-    resp = client.post("/api/chat", json={"message": "讲解一下"}, headers=_headers())
+    resp = client.post("/api/chat", json={"message": "帮我规划线性回归学习路线"}, headers=_headers())
     assert resp.status_code == 200
     assert "sk-ABCDEFGH12345678" not in resp.text
     assert "[REDACTED]" in resp.text
